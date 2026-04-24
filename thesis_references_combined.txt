@@ -1,0 +1,108 @@
+================================================================================
+THESIS — Combined Reference List (English, Harvard author–date)
+Leeds COMP3931 — Multi-Device DNN Collaborative Inference at the Edge
+Use one style consistently in Word. Sort alphabetically by first author surname
+(as below) or by order of first appearance — follow school guidance if stricter.
+================================================================================
+
+**About “Xu et al., 2019” in thesis_draft_chapters_1_to_3.txt**
+The per-chapter notes used a placeholder. A survey often used for edge+IoT and
+cited in similar work to Mao (2017) is **Yu et al. (2018)**, not Xu 2019.
+1) If you did not read a specific “Xu, X. 2019” paper, search your thesis for
+   “Xu et al., 2019” and replace the in-text citation with **(Yu et al., 2018)**
+   for the IEEE Access survey below, *or*
+2) If you *did* use a different Xu, X. et al. (2019) source, keep your in-text
+   cites and **replace the Yu entry** with the full details from that PDF
+   (title, journal, volume, pages, DOI).
+
+================================================================================
+REFERENCES
+================================================================================
+
+Fielding, R. T. (2000) *Architectural Styles and the Design of Network-based Software Architectures.* Doctoral dissertation, University of California, Irvine. Available at: http://www.ics.uci.edu/~fielding/pubs/dissertation/top.htm (Accessed: 8 April 2026).
+
+Han, S., Mao, H. and Dally, W. J. (2016) ‘Deep compression: compressing deep neural networks with pruning, trained quantization and huffman coding’, *International Conference on Learning Representations (ICLR)*. Available at: https://openreview.net/ (Accessed: 8 April 2026).
+
+Howard, A. G., Zhu, M., Chen, B., Kalenichenko, D., Wang, W., Weyand, T., Andreetto, M. and Adam, H. (2017) ‘MobileNets: efficient convolutional neural networks for mobile vision applications’, *arXiv* preprint arXiv:1704.04861. Available at: https://arxiv.org/abs/1704.04861 (Accessed: 8 April 2026).
+
+Kang, Y., Hauswald, J., Gao, C., Rovinski, A., Mudge, T. N., Mars, J. and Tang, L. (2017) ‘Neurosurgeon: collaborative intelligence between the cloud and mobile edge’, in *Proc. 22nd International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS)*, pp. 615–629. doi: 10.1145/3037697.3037698
+
+McMahan, B., Moore, E., Ramage, D., Hampson, S. and y Arcas, B. A. (2017) ‘Communication-efficient learning of deep networks from decentralized data’, in *Artificial Intelligence and Statistics (AISTATS)*, *Proceedings of Machine Learning Research* 54, pp. 1273–1282. Available at: http://proceedings.mlr.press/v54/mcmahan17a.html (Accessed: 8 April 2026).
+
+Mao, Y., You, C., Zhang, J., Huang, K. and Letaief, K. B. (2017) ‘A survey on mobile edge computing: the communication perspective’, *IEEE Communications Surveys & Tutorials*, 19(4), pp. 2322–2358. doi: 10.1109/COMST.2017.2742461
+
+Shi, W., Cao, J., Zhang, Q., Li, Y. and Xu, L. (2016) ‘Edge computing: vision and challenges’, *IEEE Internet of Things Journal*, 3(5), pp. 637–646. doi: 10.1109/JIOT.2016.2579198
+
+Yu, W., Liang, F., He, X., Hatcher, P. G., Lu, C., Lin, C. and Yang, X. (2018) ‘A survey on the edge computing for the internet of things’, *IEEE Access*, 6, pp. 6900–6918. doi: 10.1109/ACCESS.2017.2778504
+Note: use this in place of the draft’s “Xu et al. 2019” placeholder unless you have a different source.
+
+================================================================================
+Optional supplement (cited in Chapter 5 only — wider MEC; replace Yu if you prefer one 2019 survey and update in-text)
+================================================================================
+
+Pham, Q. V., Tran, T. T., Saha, S., Suh, D. H., Cao, T. and Hong, C. S. (2020) ‘A survey of multi-access edge computing in 5G and beyond: fundamentals, technology integration, and state-of-the-art’, *IEEE Access*, 8, pp. 116199–116224. doi: 10.1109/ACCESS.2020.3004473
+
+================================================================================
+WHY EIGHT CITATIONS FEELS “TOO FEW”
+The block above is only what the thesis *draft* explicitly cited. A typical final
+report in this area often has **~20–40** entries, built by: (1) background surveys
+(3–5), (2) model / CNN papers for each architecture you *name* (2–4), (3) split
+/ collaborative inference and scheduling (2–6), (4) MEC/5G/fog primers (1–3),
+(5) software and libraries you rely on (3–6), (6) ethics / data / LSE (2–4). Add
+a sentence in the main text for each; do **not** list papers you did not read.
+
+================================================================================
+EXPANDED REFERENCES — add to the final list *only* if you add matching in-text
+citations in Chapters 1, 2, 3, or Appendix (keep Harvard style; merge & sort
+with the core list in Word, removing duplicates)
+================================================================================
+
+**Fog / further edge context (Chapter 1)**
+
+Bonomi, F., Milito, R., Zhu, J. and Addepalli, S. (2012) ‘Fog computing and its role in the internet of things’, in *Proc. 1st Edition of the MCC Workshop on Mobile Cloud Computing (MCC)*, ACM, pp. 13–16. doi: 10.1145/2342509.2342513
+
+Dastjerdi, A. V. and Buyya, R. (2016) ‘Fog computing: helping the internet of things realize its potential’, *Computer*, 49(8), pp. 112–116. doi: 10.1109/MC.2016.255
+
+**Standard CNNs used as profiled models in your experiments (name them in Ch. 2 or 3)**
+
+Iandola, F. N., Han, S., Moskewicz, M. W., Ashraf, K., Dally, W. J. and Keutzer, K. (2016) ‘SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size’, *arXiv* preprint arXiv:1602.07360. Available at: https://arxiv.org/abs/1602.07360 (Accessed: 8 April 2026).
+
+Krizhevsky, A., Sutskever, I. and Hinton, G. E. (2012) ‘ImageNet classification with deep convolutional neural networks’, in *Proc. 25th International Conference on Neural Information Processing Systems (NIPS)*, vol. 1, pp. 1097–1105. Available at: http://code.google.com/p/cuda-convnet/ (historical: ImageNet; confirm volume/pages from your copy) (Accessed: 8 April 2026).
+
+Redmon, J., Divvala, S., Girshick, R. and Farhadi, A. (2016) ‘You only look once: unified, real-time object detection’, in *Proc. IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*, pp. 779–788.
+
+Simonyan, K. and Zisserman, A. (2015) ‘Very deep convolutional networks for large-scale image recognition’, in *3rd International Conference on Learning Representations (ICLR)*, San Diego, CA, USA, arXiv:1409.1556. Available at: https://arxiv.org/abs/1409.1556 (Accessed: 8 April 2026).
+
+**Visualisation and web stack (Chapter 3 — cite where you name D3, Flask, vis, etc.)**
+
+Bostock, M., Ogievetsky, V. and Heer, J. (2011) ‘D³: data-driven documents’, *IEEE Transactions on Visualization and Computer Graphics* (Proc. *InfoVis* 2011), 17(12), pp. 2301–2309. doi: 10.1109/TVCG.2011.185
+
+Grinberg, M. (2018) *Flask Web Development: Developing Web Applications with Python.* 2nd edn. O’Reilly Media, ISBN 978-1491991732.
+
+Pallets (2024) *Flask documentation* [online]. San Francisco, CA. Available at: https://flask.palletsprojects.com/ (Accessed: 8 April 2026).
+
+Pallets (2024) *Jinja documentation* [online]. Available at: https://jinja.palletsprojects.com/ (Accessed: 8 April 2026).
+
+Yelp (2015) *vis.js network visualisation* [online]. (See visjs.org / vis-network package.) Available at: https://visjs.org/ and https://github.com/visjs/vis-network (Accessed: 8 April 2026). *Note: treat as open-source project documentation; or cite the paper behind vis.js if your department prefers peer-reviewed only.*
+
+**Libraries used in the batch pipeline and server (if you name them in implementation)**
+
+Harris, C. R. et al. (2020) ‘Array programming with NumPy’, *Nature*, 585(7825), pp. 357–362. doi: 10.1038/s41586-020-2649-2
+
+McKinney, W. (2010) ‘Data structures for statistical computing in Python’, in *Proc. 9th Python in Science Conference (SciPy 2010)*, pp. 56–61.
+
+Waskom, M. (2021) *seaborn: statistical data visualization* [Python package]. v0.11.x. Available at: https://seaborn.pydata.org/ (Accessed: 8 April 2026). *Cite if you state plotting library by name; replace version/year with yours.*
+
+**Broader 5G / MEC (optional, one survey is enough; Pham 2020 already listed)**
+
+ETSI (2014) *Mobile-Edge Computing — Introductory Technical White Paper* (ETSI, September 2014). *Note: if your department wants full publisher details, copy from* https://www.etsi.org/ (Accessed: 8 April 2026).
+
+**Ethics, privacy, edge data (Appendix A — only if you discuss GDPR / consent)**
+
+European Parliament and Council of the European Union (2016) *Regulation (EU) 2016/679 of 27 April 2016* (General Data Protection Regulation). *Official Journal of the European Union* L 119, pp. 1–88. Full text: https://eur-lex.europa.eu/eli/reg/2016/679/oj (Accessed: 8 April 2026).
+
+================================================================================
+TYPICAL TARGET: merge core REFERENCES + chosen entries from here → **~18–30**
+fully justified rows; avoid duplicate surveys that say the same thing.
+================================================================================
+End of file.

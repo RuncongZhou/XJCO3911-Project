@@ -1,0 +1,138 @@
+================================================================================
+THESIS DRAFT — Chapter 4 (English)
+Leeds COMP3931 — Multi-Device DNN Collaborative Inference at the Edge
+Match styling with thesis_draft_chapters_1_to_3.txt; edit in Word (11pt, 1.5).
+Figures: figures/final_figures/ (regenerate: python generate_all_thesis_figures.py)
+If you re-run run_batch_experiments.py, refresh Table 4.1 and numeric claims from analyze_and_plot.
+Note: fig8 may be empty unless Exp 6 full grid was run; skip Figure 4.9 if the PNG is missing.
+================================================================================
+
+
+Chapter 4 Results and Evaluation
+--------------------------------------------------------------------------------
+
+This chapter reports batch simulation results produced by the platform described in Chapters 2 and 3. Section 4.1 restates the experimental design and the metrics. Section 4.2 compares the two algorithm families across four DNN model profiles, using the baseline table, bar charts, a throughput–latency scatter, and a throughput-ratio plot. Section 4.3 analyses sensitivity to device count, bandwidth, and per-device performance on AlexNet, adds a heavier model for the device-count sweep, optional cross-sensitivity where the batch grid is complete, and a stage-level diagnostic figure. Section 4.4 summarises findings and simulation scope. Limitations already noted in Chapters 2 and 3 are revisited in light of the numbers (Kang et al., 2017; Mao et al., 2017). Unless stated otherwise, graphics are the PNGs copied into **figures/final_figures/** with the file names given below (see also **simulation_insights.md** in that folder after analysis).
+
+
+4.1 Setup, baselines, and reporting conventions
+
+All pairwise comparisons in this chapter use the same model name, device count (unless swept), device order, random seed, bandwidth and performance draw ranges, and link efficiency as defined in Section 2.2, unless a subsection states an explicit change. The batch driver invokes the same comparison path as the web UI for matched payloads (McMahan et al., 2017). Primary response variables are **throughput** (batches per second) and **inference time** (seconds per single forward pass through the pipeline as reported by the engine), in line with Section 2.5.
+
+The **thesis baseline** for cross-model comparison is: five devices, bandwidth range 21–31 MB/s, device performance range 41–60 GFlops/s, and seed 1, matching the “Thesis baseline” preset in the implementation. Sensitivity subsections use AlexNet and the same seed unless stated otherwise, varying one dimension at a time. **Table 4.1** collects baseline throughput and inference time for each model and each algorithm. Minor rounding in Word relative to the CSV is acceptable if sources are named in an appendix or lab book note. Optionally, a one-page “design of experiments” image (**experimental_design_table.png** in the same folder) can appear before the table if the assessor asks for a visual experiment map; it reuses Chapter 2 text and is not required for the results narrative.
+
+
+4.2 Cross-model comparison and trade-off views
+
+Under the baseline, EdgePipe attains **higher throughput** than HiveMind on all four models; HiveMind attains **lower inference time** than EdgePipe on all four. The gap is not uniform: Vgg19 and YOLONet are compute-heavy in the profile, so throughputs are small for both algorithms, whereas AlexNet and SqueezeNet show higher absolute throughputs. **Table 4.1** gives exact numbers; **Figure 4.1** shows the same comparison as a bar plot.
+
+**Table 4.1.** Throughput and inference time under the thesis baseline (five devices, bandwidth 21–31 MB/s, performance 41–60 GFlops/s). Source: `experiments_results.csv` from the batch pipeline; values are simulation outputs, not device measurements.
+
+Model (baseline)   | Algorithm  | Throughput (batches/s) | Inference time (s)
+-------------------|------------|------------------------|--------------------
+AlexNet            | HiveMind   | 38.60                  | 0.04625
+AlexNet            | EdgePipe   | 50.88                  | 0.05799
+Vgg19              | HiveMind   | 2.09                   | 0.50850
+Vgg19              | EdgePipe   | 9.80                   | 0.71999
+YOLONet            | HiveMind   | 2.24                   | 1.00224
+YOLONet            | EdgePipe   | 5.84                   | 1.09285
+SqueezeNet         | HiveMind   | 40.74                  | 0.05862
+SqueezeNet         | EdgePipe   | 53.70                  | 0.07330
+
+Insert Figure 4.1 here: **figures/final_figures/fig1_model_comparison.png**
+
+Figure 4.1 caption: Simulated throughput and inference time for HiveMind and EdgePipe across four models under the shared baseline (Table 4.1).
+
+**Interpretation (bars).** Model depth and per-layer FLOP profiles set the scale of the numbers, not the sign of the performance gap between the two algorithms on each metric (Kang et al., 2017).
+
+**Trade-off and ratio plots.** A two-dimensional view makes the **throughput–latency trade-off** visible: the same baseline runs form a set of (throughput, inference time) pairs. **Figure 4.2** plots throughput against inference time (Pareto-style readout; lower-left is not simultaneously achievable for both engines in these runs). **Figure 4.3** reports the EdgePipe-to-HiveMind throughput ratio in the same batch—useful for relative improvement at a glance.
+
+Insert Figure 4.2 here: **figures/final_figures/fig5_pareto_tradeoff.png**
+
+Figure 4.2 caption: Simulated throughput vs inference time for both algorithms under the baselines used in the cross-model block (batch output; not a fitted frontier).
+
+Insert Figure 4.3 here: **figures/final_figures/fig6_edgepipe_speedup.png**
+
+Figure 4.3 caption: Simulated ratio of EdgePipe throughput to HiveMind throughput (same configurations as the cross-model sweep).
+
+
+4.3 Sensitivity analysis
+
+4.3.1 Device count (AlexNet)
+
+Varying the number of devices (with bandwidth and performance ranges and seed held as in the batch experiment for this sweep) shows that **throughput is not monotonic** in *K*. In the recorded batch run, EdgePipe reached its highest throughput at **three** devices and HiveMind at **four**; at six devices both algorithms’ throughputs are lower than at those peaks, indicating that extra splitting can increase communication and stage-management costs relative to the benefit of added parallelism (Kang et al., 2017; Mao et al., 2017).
+
+Insert Figure 4.4 here: **figures/final_figures/fig2_device_count.png**
+
+Figure 4.4 caption: Simulated throughput vs number of devices for AlexNet, HiveMind and EdgePipe (sweep; other parameters per batch design).
+
+
+4.3.2 Bandwidth and inference time (AlexNet, five devices)
+
+Increasing the bandwidth range from 10–20 to 21–31 to 40–60 MB/s (five devices, AlexNet) raises throughput for both algorithms, with larger separation at the highest range in the reported run (EdgePipe 92.98 and HiveMind 59.02 batches/s at 40–60 MB/s versus 50.88 and 38.60 at 21–31 MB/s). The ordering confirms that **link quality** is a first-order lever when stages exchange activations of non-trivial size (Mao et al., 2017). **Figure 4.5** shows throughput; **Figure 4.6** reports how **inference time** moves with bandwidth and with performance range on AlexNet, complementing the throughput-only line of argument.
+
+Insert Figure 4.5 here: **figures/final_figures/fig3_bandwidth.png**
+
+Figure 4.5 caption: Throughput vs bandwidth range for AlexNet, five devices (sweep; other parameters per batch design).
+
+Insert Figure 4.6 here: **figures/final_figures/fig7_inference_bw_perf.png**
+
+Figure 4.6 caption: Simulated inference time vs bandwidth range and vs device performance range for AlexNet, five devices (batch outputs; same simulation assumptions as Section 2.5).
+
+
+4.3.3 Device performance (AlexNet, five devices)
+
+Raising the per-device performance range (20–40, 41–60, 60–100 GFlops/s) shortens compute-dominated stage times. HiveMind’s inference time in the run decreases from about 0.064 s to 0.046 s to 0.041 s across these ranges, illustrating **compute scaling** in the linear model. EdgePipe’s throughput also increases, though the two algorithms need not share the same sensitivity curve.
+
+Insert Figure 4.7 here: **figures/final_figures/fig4_performance.png**
+
+Figure 4.7 caption: Throughput vs device performance range for AlexNet, five devices (sweep; other parameters per batch design).
+
+
+4.3.4 Heavier model: device count (Vgg19)
+
+To show that the non-monotone device-count effect is not an artefact of a single model, **Figure 4.8** repeats a device-count sweep for **Vgg19** when the batch script includes the corresponding configurations (higher per-layer cost than AlexNet; absolute throughputs are lower, as in Table 4.1).
+
+Insert Figure 4.8 here: **figures/final_figures/fig9_vgg19_device_count.png** (if missing, note in caption: “generate after Exp 5 device sweep in run_batch_experiments.py”).
+
+Figure 4.8 caption: Simulated throughput vs number of devices for Vgg19, HiveMind and EdgePipe (sweep; other parameters per batch design).
+
+
+4.3.5 Cross-sensitivity heatmap (optional)
+
+When the full bandwidth×performance grid is present in the batch output, **Figure 4.9** summarises a corner grid of throughputs. If the file was not generated (empty or skipped in analysis), omit this figure and refer readers to Figures 4.5–4.7 (Mao et al., 2017).
+
+Insert Figure 4.9 here (if file exists and is non-trivial): **figures/final_figures/fig8_bw_perf_heatmap.png**
+
+Figure 4.9 caption: Simulated throughput heatmap over bandwidth and device-performance corners for AlexNet, five devices (only if full grid is available; see analysis script).
+
+
+4.3.6 Stage times and bottleneck (illustrative run)
+
+**Figure 4.10** ties aggregate metrics to the pipeline view from Chapter 2: per-device stage times and the indicated bottleneck, for an illustrative configuration (e.g. AlexNet, five devices, seed 1) produced by **generate_pipeline_stage_fig.py** in the figure bundle. It supports the narrative that policy differences and topology jointly determine which stage limits throughput (Kang et al., 2017).
+
+Insert Figure 4.10 here: **figures/final_figures/fig10_pipeline_stage_times.png**
+
+Figure 4.10 caption: Per-stage time breakdown and bottleneck stage for an illustrative simulation run (definitions as in Section 2.5).
+
+
+4.4 Summary, implications, and scope
+
+**Findings.** (1) Under identical seeds and layer profiles, EdgePipe reports higher **throughput** and HiveMind lower **inference time** in the baseline block of runs. (2) The best **device count** in simulation is not always the maximum available; a heavier model sweep agrees in spirit with the AlexNet sweep when generated (Section 4.3.4). (3) **Bandwidth** and **device performance** move results in the expected directions; **Figure 4.2** and **Figure 4.3** summarise the two-metric and relative views alongside Table 4.1.
+
+**Implications for deployment (within the model).** Classify the product goal as **latency per request** or **sustained throughput**, then choose policy family and device count; use stage-level views (Figure 4.10) to explain *why* a run is bottlenecked.
+
+**Scope.** All figures and tables in this chapter come from the **in-process simulator** and CSV-based layer accounts. They do not validate wall-clock time on a multi-node hardware rig, do not model OS scheduling jitter or time-varying wireless, and do not calibrate the illustrative energy proxy to measured joules. Chapter 5 returns to future work and conclusion (Mao et al., 2017).
+
+
+References cited in Chapter 4 (merge into master list)
+
+Kang, Y. et al. (2017) Neurosurgeon. ASPLOS.
+
+Mao, Y. et al. (2017) A Survey on Mobile Edge Computing: The Communication Perspective. IEEE Communications Surveys and Tutorials.
+
+McMahan, H.B. et al. (2017) Communication-Efficient Learning of Deep Networks from Decentralized Data. AISTATS.
+
+
+================================================================================
+END OF FILE — thesis_draft_chapter_4.txt
+================================================================================

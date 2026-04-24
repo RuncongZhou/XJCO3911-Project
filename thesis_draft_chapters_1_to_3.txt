@@ -1,0 +1,259 @@
+================================================================================
+THESIS DRAFT BACKUP — Chapters 1 to 3 (English)
+Leeds COMP3931 — Multi-Device DNN Collaborative Inference at the Edge
+Generated for consolidation; edit in Word for final styling (11pt, 1.5 spacing).
+Figures: insert from figures/final_figures/ as needed.
+================================================================================
+
+
+Chapter 1 Introduction and Background Research
+--------------------------------------------------------------------------------
+
+1.1 Introduction
+
+Many everyday applications now rely on deep neural networks (DNNs) for perception and decision-making: examples include object recognition on a phone camera or simple scene understanding in retail or light-industrial settings. When models are large and devices are small, a common pattern has been to upload raw inputs to a remote cloud server, run inference there, and return only the final label or score. That model works well when delay is unimportant and data may leave the premises freely; it is less attractive when users expect quick responses, pay for wireless bandwidth, or must keep raw data local for operational or privacy reasons (Howard et al., 2017; Kang et al., 2017).
+
+Edge computing places computation nearer to sensors and users, on phones, gateways, or small local servers, so that not every task travels to a distant data centre (Shi et al., 2016; Mao et al., 2017; Xu et al., 2019). For inference, one response to limited on-device capability is to design smaller or more efficient networks so that a single device can run the full model (Howard et al., 2017; Han et al., 2016). A complementary response is collaborative inference: the same logical network is split across several devices, each executing some layers or pipeline stages, with activations or intermediate tensors exchanged over device-to-device links (Kang et al., 2017). The system must therefore balance local computation, communication time, and ordering of work.
+
+This individual project implements a software platform that supports simulation-based comparison of placement and scheduling strategies (HiveMind-style and EdgePipe-style algorithms) under controlled assumptions about device order, link bandwidths, and per-device compute. The platform provides visualisation (model structure, topology, partition) and metrics (throughput, latency, pipeline stage timing, communication-oriented summaries, and illustrative proxy quantities discussed in Chapter 2). The purpose is to make trade-offs inspectable and reproducible, including through random seeds for generated topologies.
+
+The contribution of the dissertation can be stated as follows: (1) a working system that integrates algorithms, data-driven layer profiles, and a web front end; (2) a consistent evaluation methodology (batch and interactive runs, figures summarising sweeps over models, device counts, and network conditions); and (3) a critical discussion of limitations and future work. Chapter 2 details methodology and assumptions; Chapter 3 describes implementation and validation; Chapter 4 presents results; Chapter 5 concludes.
+
+The remainder of this chapter reviews background research in three areas: constraints and motivations for edge inference (Section 1.2.1), partitioning and pipelining (Section 1.2.2), and evaluation and reproducibility (Section 1.2.3), before positioning this project (Section 1.2.4).
+
+
+1.2 Literature Review
+
+1.2.1 Edge intelligence, constraints, and complementary directions
+
+Mobile and embedded settings impose tight limits on memory, energy, and thermal behaviour, which has motivated compact architectures and compression methods so that inference can remain on a single device when possible (Howard et al., 2017; Han et al., 2016). Surveys of mobile edge computing emphasise latency, bandwidth, and placement of computation along the cloud–edge continuum as defining constraints for applications that cannot afford round-trips to a remote cloud (Mao et al., 2017; Xu et al., 2019). Federated learning has highlighted decentralised training under communication budgets and privacy motivations (McMahan et al., 2017); while federated learning addresses learning from distributed data, its attention to communication cost and orchestration parallels inference-time concerns when tensors move between peers.
+
+Together, this work shows that no single knob solves every deployment: model efficiency helps device-only execution; collaborative inference addresses cases where multiple modest devices cooperate along a pipeline or graph so that no single node must hold or run the entire network (Kang et al., 2017).
+
+
+1.2.2 Partitioning, pipelining, and collaborative inference
+
+Neurosurgeon (Kang et al., 2017) is a representative system for automatic partition of DNN layers between mobile and cloud, using estimates of per-layer compute and tensor transfer to choose cuts that improve latency or energy under a given bandwidth. The work established a widely reused intuition: the best cut is jointly determined by compute intensity, intermediate data size, and link speed, not by layer count alone. Subsequent research in edge AI and split inference continues to explore where to cut, how to schedule stages, and how to overlap communication and computation in pipelined settings (Mao et al., 2017).
+
+This dissertation adopts a pipeline-oriented evaluation: given a partition, the implementation attributes stage times and identifies bottlenecks, enabling comparison of two algorithmic families under the same topology and random seed. That mirrors the controlled comparison philosophy advocated in systems-oriented work (Kang et al., 2017), while abstracting lower-level details as out of scope for this project.
+
+Insert Figure 1.1 here (e.g. figures/final_figures/pipeline_partition_and_schedule.png).
+
+Figure 1.1 caption: Schematic device chain, layer-wise partition across three devices, and pipelined execution for two concurrent batches (conceptual; not algorithm-specific).
+
+
+1.2.3 Metrics, simulation, and reproducibility
+
+Studies of edge and fog systems often employ simulation or trace-driven models to compare policies when building large or heterogeneous testbeds is difficult (Mao et al., 2017; Xu et al., 2019). Typical reported metrics include throughput, end-to-end latency, per-stage delay, and data transferred—quantities that help distinguish compute-bound stages from communication-bound stages (Kang et al., 2017). Where absolute energy numbers are unavailable, illustrative proxies may still support comparative discussion if their assumptions are stated transparently (addressed in Chapter 2).
+
+Reproducibility is supported by fixing random seeds for stochastic components of topology and bandwidth generation, consistent with good experimental practice elsewhere in distributed machine learning (McMahan et al., 2017). Chapter 4 links these choices to the figures and tables produced by the batch pipeline.
+
+
+1.2.4 Positioning of this project
+
+Prior work provides algorithms and evaluation ideas for partitioned inference; this project contributes engineering integration: a browser-based environment, shared assumptions across algorithms, exportable results, and a clear statement of simulation scope. It does not claim to replace a full hardware study; that gap is acknowledged in Chapters 4 and 5.
+
+
+References cited in Chapter 1 (merge into master reference list)
+
+Han, S., Mao, H. and Dally, W.J. (2016) Deep Compression. ICLR.
+
+Howard, A.G. et al. (2017) MobileNets. arXiv:1704.04861.
+
+Kang, Y. et al. (2017) Neurosurgeon. ASPLOS.
+
+McMahan, H.B. et al. (2017) Communication-Efficient Learning of Deep Networks from Decentralized Data. AISTATS.
+
+Mao, Y. et al. (2017) A Survey on Mobile Edge Computing: The Communication Perspective. IEEE Communications Surveys and Tutorials.
+
+Shi, W. et al. (2016) Edge Computing: Vision and Challenges. IEEE Internet of Things Journal.
+
+Xu, X. et al. (2019) (Confirm exact bibliographic record from your source.)
+
+
+================================================================================
+Chapter 2 Methodology
+================================================================================
+
+This chapter specifies how the project evaluates collaborative DNN inference at the edge. It first formalises inputs and outputs (Section 2.1), then states what is held constant and what is varied (Section 2.2). Section 2.3 summarises the two algorithm families at interface level. Section 2.4 describes platform architecture and workflow. Section 2.5 defines metrics and proxies. Section 2.6 covers validation and limitations. Fair comparison requires identical seeds, identical layer metadata, and matched topology when contrasting policies (Kang et al., 2017; Mao et al., 2017).
+
+
+2.1 Problem formulation and notation
+
+Collaborative inference is modelled as a staged pipeline. A feed-forward DNN has L layers with per-layer FLOP workloads and intermediate tensor sizes from CSV profiles (Howard et al., 2017; Han et al., 2016). For K devices in a fixed pipeline order s = (s0, …, sK−1), a partition assigns each device i a contiguous layer range in one-based inclusive indexing. Data moves between consecutive devices according to a symmetric bandwidth matrix B (MB/s) and a first-hop bandwidth vector for the entry stage. Each device j has a nominal compute rate fj (GFlops/s) used in a linear compute-time model from layer FLOPs, which is a standard abstraction when kernel scheduling is out of scope (Kang et al., 2017).
+
+The simulation does not train weights; it evaluates partitions and schedules from HiveMind-style and EdgePipe-style engines under shared B, f, and profiles, isolating policy effects where possible (Mao et al., 2017).
+
+Inputs include: model name, K, order s, ranges for drawing B and f, random seed, optional link efficiency η in (0, 1] scaling effective link rates in evaluation, and optionally a user partition. Outputs include throughput, inference time, per-stage times, bottleneck stage index, staged activation traffic totals, and an illustrative energy proxy (Section 2.5).
+
+Table 2.1 summarises notation used later. Present as a Word table with three columns if required.
+
+Table 2.1 Notation and default baseline (thesis preset where applicable).
+
+L: number of layers in the model profile; model-dependent from CSV.
+
+K: number of devices; default 5 in the baseline preset.
+
+s: pipeline device order as a permutation of device indices; default (0, 1, …, K−1) unless shuffled.
+
+B: symmetric bandwidth matrix in MB/s; off-diagonals random integers in [21, 31] under baseline bandwidth range.
+
+f: per-device compute vector in GFlops/s; linear spacing across devices in [41, 60] under baseline performance range.
+
+Seed: controls random draws for matrices; default 1 for batch scripts and matching interactive runs.
+
+η: link efficiency factor scaling effective rates in evaluation; default 1.0 unless a sensitivity run changes it.
+
+Partition: start and end layer indices per device; from engine or user custom scheme.
+
+
+2.2 Simulation methodology and controlled factors
+
+Bandwidth entries are generated as uniform random integers within user min and max bounds. A fixed seed fixes draws so batch Python experiments and the web UI can be reconciled when configurations match (McMahan et al., 2017). This supports reproducibility at the level of pseudo-random structure (Mao et al., 2017).
+
+When one dimension is swept, other dimensions default to the thesis baseline unless Chapter 4 states otherwise. Cross-sensitivity heatmaps use a small grid of corners; designs are documented to avoid confounded conclusions (Kang et al., 2017).
+
+The optional η scales effective rates used in timing while leaving the displayed matrix as the underlying draw (Mao et al., 2017). Claims remain relative under the same η.
+
+
+2.3 Algorithm families: interfaces and comparison discipline
+
+The HiveMind-style path searches a graph-structured representation informed by layer costs and link capacities, then returns a partition and timing estimates. The dissertation treats the engine as a black box with documented inputs and outputs. Relay devices with empty ranges trigger redistribution so each device holds a contiguous non-empty block when depth allows.
+
+The EdgePipe-style path uses a pipelined planning formulation under the same injected data. Post-processing evaluates stage times and traffic consistently from the final partition (Kang et al., 2017).
+
+For pairwise comparison, model, K, s, seed, ranges, and η are identical; only the algorithm choice changes (Kang et al., 2017; Mao et al., 2017).
+
+
+2.4 Platform architecture and end-to-end workflow
+
+The browser collects configuration, renders topology and partitions, and calls JSON APIs. The Flask server orchestrates engines and returns metrics. CSV layer files are injected into engine objects; module-level context is synchronised for both algorithm packages.
+
+Insert Figure 2.1 here (e.g. figures/final_figures/figure_2_1_platform_architecture.png).
+
+Figure 2.1 caption: High-level architecture of the platform: browser configuration and visualisation, Flask JSON APIs, simulation engines with injected layer profiles and bandwidth context, and CSV layer data.
+
+Workflow: (1) configure; (2) simulate; (3) optionally compare; (4) export. Batch mode repeats step 2 for sweeps; methodology treats both modes as the same logical experiment when payloads match.
+
+
+2.5 Metrics, proxies, and reporting conventions
+
+Throughput and inference time come from engine objectives. Per-stage times and bottleneck index come from pipeline evaluation recomputed from the final partition (Kang et al., 2017).
+
+Activation traffic is the sum of staged tensor sizes in megabytes implied by the partition and the DataSize column (Mao et al., 2017).
+
+The energy proxy combines total compute seconds and total communication megabytes with fixed coefficients in software outputs; comparative only, not calibrated joules (Section 2.6).
+
+
+2.6 Validation approach and limitations
+
+Internal checks include matching seed and ranges between UI and batch outputs, partition feasibility, and exported JSON fields. These support internal consistency without external hardware validation (Mao et al., 2017).
+
+The study does not claim wall-clock fidelity on physical devices, time-varying bandwidth or queueing, non-linear compute beyond the linear model, or calibrated on-board energy. Chapter 5 discusses future work.
+
+References cited in Chapter 2 (merge into master list): Han et al., 2016; Howard et al., 2017; Kang et al., 2017; McMahan et al., 2017; Mao et al., 2017.
+
+
+================================================================================
+Chapter 3 Implementation and Validation
+================================================================================
+
+This chapter describes how the multi-device collaborative inference platform was built and how its behaviour was checked against the methodology in Chapter 2. Section 3.1 states design goals and overall layering. Section 3.2 covers the server: REST-style JSON endpoints, engine integration, layer profile injection, and post-processing for pipeline metrics. Section 3.3 describes the browser client: visualisation, partition editing, metrics and comparison views, presets, seeds, and link efficiency. Section 3.4 explains the offline batch pipeline. Section 3.5 reports validation activities and limits. The emphasis is on traceability from configuration to numerical output (Kang et al., 2017; Mao et al., 2017).
+
+
+3.1 Design goals and system overview
+
+The implementation aimed to satisfy four goals. First, a non-expert user should configure a scenario without editing source code. Second, results should be inspectable: not only throughput and latency, but partitions, matrices, per-stage timing, bottleneck information, and optional communication and proxy energy summaries. Third, experiments should be reproducible: the same numeric seed should yield the same draws when configuration matches, aligning interactive runs with batch scripts (McMahan et al., 2017). Fourth, the code base should remain maintainable: clear separation between HTTP handling, engine invocation, and presentation logic.
+
+Architecturally, the system follows a thin-client pattern. The browser sends JSON payloads to a Flask application; the server loads engine objects, injects layer data from comma-separated files, applies device and bandwidth context, runs the selected algorithm, and returns structured JSON. Visualisation libraries render the model graph, the device network, and partition blocks in the client (Fielding, 2000).
+
+Insert Figure 3.1 here. Suggested: component diagram or screenshot collage.
+
+Figure 3.1 caption: Major software components of the implemented platform: web client, Flask service, simulation engines, and layer profile data.
+
+
+3.2 Backend implementation
+
+3.2.1 Service framework and API surface
+
+The server is implemented in Python using Flask. Endpoints accept JSON bodies and return JSON. Representative routes include: layer metadata for a model; random device topology; full simulation with optional custom partition; comparison of algorithms under the same configuration; and the main HTML page. Error paths return JSON with an error field where possible.
+
+The interface is intentionally small and stateless between requests: no server-side session is required for a simulation run.
+
+3.2.2 Layer data and model coverage
+
+Layer-wise workloads and data sizes are read from project CSV files keyed by model name. Numeric columns are parsed so that comma-separated thousands in spreadsheets do not break ingestion. HiveMind-style paths use layer_flops-style arrays; EdgePipe-style paths use flops_per_layer-style arrays, with an adapter so pipeline evaluation receives consistent arrays.
+
+3.2.3 Bandwidth context and device order
+
+Device order is passed explicitly and mirrored into algorithm modules before planning. Bandwidth matrices are symmetric random integers from the configured range. First-hop vectors align with the same seed logic as the interactive path.
+
+Optional link efficiency scales effective rates inside evaluation while leaving the displayed matrix as the underlying draw (Mao et al., 2017).
+
+3.2.4 Simulation and comparison logic
+
+For standard runs, the server instantiates the engine class, runs assignment and planning, extracts the partition, and may redistribute relay devices. Throughput and latency come from the engine. Separately, a pipeline evaluation pass recomputes per-stage times from the final partition; from this pass derive stage times, bottleneck indices, staged communication volumes, and the illustrative energy proxy.
+
+For comparison requests, each algorithm runs under the same seed, ranges, and device order.
+
+3.2.5 Implementation notes
+
+The implementation favours clarity over micro-optimisation. JSON serialisation converts NumPy types to native Python types. Non-finite floats are mapped to null or zero in client-facing JSON where appropriate.
+
+
+3.3 Frontend implementation
+
+3.3.1 Page structure and navigation
+
+The main page uses tabs: model structure, device topology, partition view, metrics, and algorithm comparison. Tab state is managed in JavaScript without a heavy framework.
+
+3.3.2 Visualisation
+
+The model hierarchy is drawn with D3.js. The topology view uses vis-network. The partition view renders each device as a block and lists layer indices as chips.
+
+Insert Figure 3.2 here. Suggested: topology or partition screenshot.
+
+Figure 3.2 caption: Example visualisation of device topology and layer partition (screenshot from the implemented platform).
+
+3.3.3 Metrics and comparison views
+
+After simulation, the metrics area shows throughput, inference time, utilisation-style summaries, communication and proxy energy fields, bandwidth heatmaps, bar charts for performance and pipeline stages, and bottleneck notes. The comparison tab renders side-by-side bars and extended tables. Export buttons download JSON and CSV where implemented.
+
+3.3.4 Usability and experimental alignment
+
+Preset buttons align fields with batch experiments. A random seed field is echoed in results. The link efficiency slider is labelled as simulation-only.
+
+Insert Figure 3.3 here. Suggested: metrics or compare tab screenshot.
+
+Figure 3.3 caption: Metrics and comparison views with configuration fields (screenshot).
+
+
+3.4 Batch pipeline and figure generation
+
+A batch script enumerates experiment configurations, calls the same comparison logic directly in Python without HTTP, and writes a CSV. A second script loads that file and generates standard plots into the figures directory; generate_all_thesis_figures.py can refresh the bundle into figures/final_figures for thesis insertion. Interactive and batch paths should match when payloads match (Kang et al., 2017).
+
+
+3.5 Validation
+
+Validation combined manual checks and consistency arguments. Representative configurations were run through both the UI and the batch path with identical parameters; outputs were compared at field level. Partition feasibility was inspected. The platform was not validated against physical multi-device hardware; claims remain within the simulation scope (Mao et al., 2017). Chapter 4 interprets results under that scope.
+
+
+3.6 Dependencies and deployment
+
+The server depends on Python packages for HTTP, arrays, and tabular IO; the client depends on modern browsers supporting fetch and the bundled visualisation libraries. Local deployment uses Flask’s development server for demonstration; production WSGI deployment was out of scope (Chapter 5).
+
+
+References cited in Chapter 3 (merge into master list)
+
+Fielding, R.T. (2000) Architectural Styles and the Design of Network-based Software Architectures. Doctoral dissertation, University of California, Irvine.
+
+Kang, Y. et al. (2017) Neurosurgeon. ASPLOS.
+
+Mao, Y. et al. (2017) A Survey on Mobile Edge Computing: The Communication Perspective. IEEE Communications Surveys and Tutorials.
+
+McMahan, H.B. et al. (2017) Communication-Efficient Learning of Deep Networks from Decentralized Data. AISTATS.
+
+
+================================================================================
+END OF FILE — thesis_draft_chapters_1_to_3.txt
+================================================================================

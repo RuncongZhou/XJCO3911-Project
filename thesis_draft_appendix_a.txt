@@ -1,0 +1,59 @@
+================================================================================
+THESIS DRAFT — Appendix A: Self-Appraisal (English)
+Leeds COMP3931 — Design and Implementation of a Multi-Device DNN
+Collaborative Inference System at the Edge
+Match school template: Template.md, Appendix A. Target length: 2–4 pages in Word
+(11 pt, 1.5 line spacing). Edit for personal details (supervisor meetings, dates).
+================================================================================
+
+
+Appendix A  Self-Appraisal
+--------------------------------------------------------------------------------
+
+This appendix satisfies the self-appraisal criterion in the mark scheme. It is organised in three parts: a critical self-evaluation of the work (Section A.1), personal reflection and lessons learned (Section A.2), and legal, social, ethical, and professional issues (Section A.3), including brief remarks where a category is only weakly relevant to this project.
+
+
+A.1  Critical self-evaluation
+
+Strengths. The project delivered a coherent end-to-end artefact: a browser-based front end, a JSON API layer, two integrated partition/schedule engines (HiveMind-style and EdgePipe-style) under shared layer profiles, and a batch evaluation pipeline with reproducible figures. The main scientific contribution of the work is engineering and comparative methodology: the dissertation makes policy differences inspectable and reproducible (fixed seeds, shared topology assumptions) rather than introducing a new training algorithm. Chapter 4 shows a clear trade-off between throughput and single-sample latency for the two families under the simulator, which is consistent with the design intent. The limitation—simulation rather than on-device wall-clock validation—is stated explicitly in the main text and in Chapter 5, which I treat as a strength in honesty rather than a last-minute disclaimer.
+
+Weaknesses. First, the evaluation remains simulation-centric. I did not mount a multi-node physical testbed; therefore, claims about ranking and bottlenecks should be read as model-based under the linear compute and static bandwidth abstractions. Second, the energy figures in the software are an illustrative proxy, not measured joules; they support comparative discussion only when the assumptions are shared. Third, the usability of the interface was not studied through a formal user trial; “usable” is supported by informal use during development and by the presence of presets and tabbed workflows, not by a structured study. Fourth, the model coverage is limited to the layer profiles and algorithms bundled in the repository; the architecture could host more, but the dissertation does not exhaustively benchmark every published split-inference method.
+
+Balance. Given the time frame of a single project, the balance between building the platform and evaluating it is reasonable, but a stronger dissertation would have included even a small hardware comparison or a trace-driven link model. That direction is set out in Chapter 5 and would be my priority in an extended programme.
+
+
+A.2  Personal reflection and lessons learned
+
+Technical skills. I deepened my skills in Python server development (Flask, JSON APIs, separation of HTTP handling from engine code), in JavaScript for tabbed UIs and for integrating external visualisation libraries, and in managing reproducible experiments (batch scripts, CSV output, figure generation from a single results file). I also became more comfortable reading systems-style papers and mapping their evaluation ideas to a working implementation.
+
+Project management. The work naturally split into back-end integration, front-end views, and batch analysis. I learned to freeze interfaces early (e.g. comparison payloads) so the UI and the batch path did not diverge. Where estimates slipped, the cause was usually under-scoping integration testing between engines and the post-processing of pipeline metrics, not theoretical difficulty.
+
+What I would do differently. I would reserve earlier calendar time for a minimal hardware or container-based sanity check, even if it could not support a full results chapter, because it would strengthen the plausibility narrative. I would also start the figure-generation scripts earlier so the thesis chapter and the batch sweeps were always in lockstep.
+
+Support. Regular interaction with the supervisor (frequency and dates: as per your records) helped scope the “simulation-only” position and the reporting of limitations. (Replace this sentence with your real meeting pattern or delete if you prefer.)
+
+
+A.3  Legal, social, ethical, and professional issues
+
+A.3.1  Legal issues
+
+The software processes public model metadata in the form of layer-wise FLOP and tensor-size profiles and does not, in the default configuration, collect or store personal data as defined in UK GDPR. If the platform were deployed as a public service, operators would need a lawful basis and transparency notices for any logging of IP addresses, usage telemetry, or uploaded content; the dissertation prototype is intended for local or laboratory use, which reduces exposure but does not remove general duties of care. Intellectual property: third-party code and libraries are used under their respective licences; the project does not redistribute trained model weights as binary artifacts subject to separate licence terms in this scope (confirm against your actual repository contents). I avoided copying prose or figures from other students’ work and kept referencing consistent with the main reference list.
+
+A.3.2  Social issues
+
+Access and inclusion. A web-based local tool is accessible in principle to users with a modern browser, but it assumes technical literacy in neural networks and edge settings; it is not aimed at non-specialist end users without support. Employment and automation: the project does not automate decisions about people; it supports engineering decisions about where to partition inference in collaborative edge settings. The social impact of better edge resource use is indirect (e.g. lower latency in local services, less raw data in transit) but that benefit depends on responsible deployment, which this dissertation does not prescribe.
+
+A.3.3  Ethical issues
+
+Research integrity. Results and figures in Chapter 4 are generated from the described simulator and sweeps; where randomness is used, a seed is recorded so that internal re-runs are checkable. I did not fabricate numbers or select only favourable plots without describing the sweep. Data ethics: the experiments do not use private datasets of individuals; the ethical weight lies in future use if a fork of the code were connected to real cameras or personal streams—that would require consent, data minimisation, and purpose limitation under GDPR-style norms. Dual use: like many systems tools, the platform could be mis-described; the report stays within collaborative inference and does not support harmful applications.
+
+A.3.4  Professional issues
+
+I aimed for reproducibility (version-controlled code, batch scripts, documented presets) and for **clear limitation statements** in line with BCS/ACM expectations for honest professional communication. Citing sources in Chapters 1–2 and the reference list supports traceability. Competence: I have not presented simulation outputs as if they were lab-measured on physical edge clusters without qualification. If this work were continued commercially, a professional would add security review (authentication on APIs), deployment hardening (WSGI, TLS), and maintenance planning—outside the proof-of-concept scope of the module project.
+
+Relevance of categories. Legal and ethical categories apply mainly as preparation for deployment; social impact is moderate and indirect for a methods-and-tooling project. I have nevertheless addressed each heading because the mark scheme requires it.
+
+
+================================================================================
+END OF FILE — thesis_draft_appendix_a.txt
+================================================================================

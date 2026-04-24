@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Functional Modules</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(160deg, #0f766e 0%, #134e4a 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .slide {
+            width: 960px;
+            max-width: 100%;
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+        }
+        .slide-head {
+            background: linear-gradient(90deg, #0d9488 0%, #14b8a6 100%);
+            color: #fff;
+            padding: 20px 32px;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .slide-body { padding: 28px 36px 32px; }
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .module {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 18px;
+            text-align: center;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            border-top: 3px solid #e2e8f0;
+            transition: transform 0.15s ease;
+        }
+        .module:nth-child(1) { border-top-color: #3b82f6; }
+        .module:nth-child(2) { border-top-color: #10b981; }
+        .module:nth-child(3) { border-top-color: #f59e0b; }
+        .module:nth-child(4) { border-top-color: #8b5cf6; }
+        .module-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+        .module:nth-child(1) .module-num { background: #dbeafe; color: #1d4ed8; }
+        .module:nth-child(2) .module-num { background: #d1fae5; color: #047857; }
+        .module:nth-child(3) .module-num { background: #fef3c7; color: #b45309; }
+        .module:nth-child(4) .module-num { background: #ede9fe; color: #6d28d9; }
+        .module-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        .module-desc {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.45;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-head">Main Functional Modules</div>
+        <div class="slide-body">
+            <div class="modules">
+                <div class="module">
+                    <div class="module-num">1</div>
+                    <div class="module-title">Model & Layer Management</div>
+                    <div class="module-desc">Load DNN models (AlexNet, Vgg19, YOLONet), display layer hierarchy and attributes (FLOPs, data size, type).</div>
+                </div>
+                <div class="module">
+                    <div class="module-num">2</div>
+                    <div class="module-title">Device & Topology Config</div>
+                    <div class="module-desc">Set device count, bandwidth and performance range, generate device topology and order.</div>
+                </div>
+                <div class="module">
+                    <div class="module-num">3</div>
+                    <div class="module-title">Partition & Simulation</div>
+                    <div class="module-desc">Algorithm partition (HiveMind / EdgePipe) or user-defined ranges; pipeline simulation and throughput / latency.</div>
+                </div>
+                <div class="module">
+                    <div class="module-num">4</div>
+                    <div class="module-title">Visualization & Comparison</div>
+                    <div class="module-desc">Model structure, topology, partition scheme, metrics; side-by-side algorithm comparison.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

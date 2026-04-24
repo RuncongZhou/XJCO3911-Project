@@ -1,0 +1,18 @@
+================================================================================
+THESIS — Summary (English, for front matter)
+Leeds COMP3931 — Design and Implementation of a Multi-Device DNN
+Collaborative Inference System at the Edge
+Target: one A4 page at 11 pt, 1.5 line spacing (edit length in Word if needed).
+================================================================================
+
+Summary
+
+Running large deep neural networks on a single edge device is often infeasible; collaborative inference splits a model across several devices and exchanges intermediate activations over local links. Designers then need to compare placement and scheduling policies under realistic assumptions about device order, link bandwidth, and per-device compute, and to see how changes to the environment affect throughput and latency. This individual project addresses that need by implementing a web-based platform that simulates multi-device pipeline inference and presents the results in an inspectable, reproducible form.
+
+The problem set for the work was to integrate two representative planning families—HiveMind-style (latency-oriented) and EdgePipe-style (throughput-oriented) engines—behind a shared interface, inject the same layer-wise profiles and random device context for both, and support both interactive use and batch sweeps for thesis figures. The main deliverable is a software system that includes a Flask service with JSON APIs, a browser client with visualisations of model structure, device topology, partitions, metrics, and algorithm comparison, and an offline batch pipeline that writes tabular results and drives a standard figure bundle. Experiments use fixed random seeds where appropriate so that interactive runs and batch outputs can be reconciled when configurations match.
+
+The main achievements are threefold. First, the platform provides a working end-to-end path from configuration to numerical metrics, including per-stage timing, bottleneck identification, and illustrative communication-related summaries, without requiring a physical multi-node testbed. Second, the evaluation methodology is applied consistently across several model profiles, device counts, and bandwidth and performance ranges, producing aggregate figures and tables that support discussion of design trade-offs. Third, the results in the simulation show a clear throughput–latency trade-off between the two policy families under identical seeds, and sensitivity analyses show that throughput is not always monotonic in the number of devices, in line with communication–computation interaction in pipelined settings. The study does not claim wall-clock accuracy on real hardware or calibrated energy; claims are scoped to the stated linear compute and static link model, with limitations and future work summarised in the conclusions.
+
+================================================================================
+END OF FILE
+================================================================================

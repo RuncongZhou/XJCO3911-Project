@@ -1,0 +1,5 @@
+# Optional: real two-process validation (install in same venv as project)
+torch>=2.0.0
+torchvision>=0.15.0
+# For thesis figures (same as analyze_and_plot.py)
+matplotlib>=3.5.0

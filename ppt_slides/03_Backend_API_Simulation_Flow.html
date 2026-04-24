@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend API and Simulation Flow</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #1c1917;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .slide {
+            width: 960px;
+            max-width: 100%;
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+        }
+        .slide-head {
+            background: linear-gradient(90deg, #b45309 0%, #f59e0b 100%);
+            color: #fff;
+            padding: 18px 32px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .slide-body { padding: 40px 48px 44px; }
+        .flow-vertical {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 20px 24px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border-left: 5px solid #e2e8f0;
+        }
+        .step + .step { margin-top: 16px; }
+        .step:nth-child(1) { border-left-color: #3b82f6; }
+        .step:nth-child(2) { border-left-color: #f59e0b; }
+        .step:nth-child(3) { border-left-color: #10b981; }
+        .step:nth-child(4) { border-left-color: #6366f1; }
+        .step-num {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #475569;
+            font-size: 22px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .step:nth-child(1) .step-num { background: #dbeafe; color: #1d4ed8; }
+        .step:nth-child(2) .step-num { background: #fef3c7; color: #b45309; }
+        .step:nth-child(3) .step-num { background: #d1fae5; color: #047857; }
+        .step:nth-child(4) .step-num { background: #e0e7ff; color: #4f46e5; }
+        .step-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.3;
+        }
+        .step-detail {
+            font-size: 15px;
+            color: #64748b;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+        .arrow-between {
+            text-align: center;
+            color: #cbd5e1;
+            font-size: 24px;
+            margin: 4px 0;
+        }
+        .api-tags {
+            margin-top: 32px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+        .api-tag {
+            padding: 12px 20px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #334155;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-head">Backend API and Simulation Flow</div>
+        <div class="slide-body">
+            <div class="flow-vertical">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div>
+                        <div class="step-text">User clicks Simulate</div>
+                    </div>
+                </div>
+                <div class="arrow-between">↓</div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div>
+                        <div class="step-text">Frontend → POST /api/simulate</div>
+                    </div>
+                </div>
+                <div class="arrow-between">↓</div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div>
+                        <div class="step-text">Backend runs algorithm or evaluates custom partition</div>
+                        <div class="step-detail">Returns: partition · throughput · inference time</div>
+                    </div>
+                </div>
+                <div class="arrow-between">↓</div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div>
+                        <div class="step-text">Frontend updates visualization</div>
+                    </div>
+                </div>
+            </div>
+            <div class="api-tags">
+                <span class="api-tag">/layers</span>
+                <span class="api-tag">/simulate</span>
+                <span class="api-tag">/device-topology</span>
+                <span class="api-tag">/compare</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Device DNN Collaborative Inference Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vis-network@latest/dist/vis-network.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vis-network@latest/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <main class="main-wrapper">
+        <header class="page-header">
+            <h1>Multi-Device DNN Collaborative Inference Platform</h1>
+            <p class="page-subtitle">Visualization &amp; Simulation</p>
+        </header>
+
+        <section class="content-grid">
+            <aside class="config-panel">
+                <fieldset class="config-block">
+                    <legend>Model</legend>
+                    <div class="field-row">
+                        <label for="modelSelect">Model:</label>
+                        <select id="modelSelect" class="input-field">
+                            <option value="AlexNet">AlexNet</option>
+                            <option value="Vgg19">VGG19</option>
+                            <option value="YOLONet">YOLONet</option>
+                            <option value="SqueezeNet">SqueezeNet</option>
+                        </select>
+                    </div>
+                    <div class="field-row">
+                        <label for="deviceNum">Devices:</label>
+                        <input type="number" id="deviceNum" class="input-field" min="2" max="10" value="5">
+                    </div>
+                    <div class="field-row">
+                        <label for="algorithmSelect">Algorithm:</label>
+                        <select id="algorithmSelect" class="input-field">
+                            <option value="HiveMind">HiveMind</option>
+                            <option value="EdgePipe">EdgePipe</option>
+                        </select>
+                    </div>
+                </fieldset>
+
+                <fieldset class="config-block">
+                    <legend>Quick presets (align with batch experiments)</legend>
+                    <div class="preset-row">
+                        <button type="button" class="preset-btn" data-preset="paper" title="5 dev, 21–31 MB/s, 41–60 GFlops/s">Thesis baseline</button>
+                        <button type="button" class="preset-btn" data-preset="lowbw">Low BW</button>
+                        <button type="button" class="preset-btn" data-preset="highbw">High BW</button>
+                        <button type="button" class="preset-btn" data-preset="lowperf">Low perf</button>
+                        <button type="button" class="preset-btn" data-preset="highperf">High perf</button>
+                    </div>
+                </fieldset>
+
+                <fieldset class="config-block">
+                    <legend>Device config</legend>
+                    <div class="field-row">
+                        <label for="randomSeed">Random seed</label>
+                        <input type="number" id="randomSeed" class="input-field" value="1" step="1" title="Same as np.random.seed; batch script uses 1">
+                    </div>
+                    <div class="field-row">
+                        <label for="linkEfficiency">Link efficiency (effective bandwidth, simulation)</label>
+                        <div class="range-group">
+                            <input type="range" id="linkEfficiency" min="5" max="100" value="100" title="Scales inter-device and first-hop bandwidth for evaluation (e.g. congestion)">
+                            <span id="linkEfficiencyLabel" class="range-label">100%</span>
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <label>Bandwidth range (MB/s):</label>
+                        <div class="range-group">
+                            <input type="number" id="bandwidthMin" class="input-field" value="21" min="1" max="50">
+                            <span> - </span>
+                            <input type="number" id="bandwidthMax" class="input-field" value="31" min="1" max="50">
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <label>Performance range (GFlops/s):</label>
+                        <div class="range-group">
+                            <input type="number" id="performanceMin" class="input-field" value="41" min="1" max="100">
+                            <span> - </span>
+                            <input type="number" id="performanceMax" class="input-field" value="60" min="1" max="100">
+                        </div>
+                    </div>
+                    <button id="generateTopologyBtn" class="action-btn action-btn-secondary">Generate topology</button>
+                </fieldset>
+
+                <fieldset class="config-block">
+                    <legend>Device order</legend>
+                    <div id="deviceOrderContainer" class="device-order-container"></div>
+                    <button id="randomOrderBtn" class="action-btn action-btn-secondary">Shuffle</button>
+                </fieldset>
+
+                <fieldset class="config-block">
+                    <legend>Partition design</legend>
+                    <p class="partition-hint">Specify layer range per device (1 = first layer). When enabled, custom partition is used instead of the algorithm.</p>
+                    <div class="field-row">
+                        <label><input type="checkbox" id="useCustomPartition"> Use custom partition</label>
+                    </div>
+                    <div id="partitionDesignContainer" class="partition-design-container"></div>
+                    <button id="applyAlgoPartitionBtn" class="action-btn action-btn-secondary" style="margin-top:8px;">Apply partition from last run</button>
+                </fieldset>
+
+                <fieldset class="config-block">
+                    <button id="simulateBtn" class="action-btn action-btn-primary">Run simulation</button>
+                    <button id="compareBtn" class="action-btn action-btn-success">Compare algorithms</button>
+                </fieldset>
+            </aside>
+
+            <article class="viz-section">
+                <nav class="tab-nav">
+                    <button class="tab-btn active" data-tab="model">Model structure</button>
+                    <button class="tab-btn" data-tab="topology">Topology</button>
+                    <button class="tab-btn" data-tab="partition">Partition</button>
+                    <button class="tab-btn" data-tab="metrics">Metrics</button>
+                    <button class="tab-btn" data-tab="compare">Compare</button>
+                </nav>
+
+                <section class="tab-pane active" id="modelTab">
+                    <h3>DNN model hierarchy</h3>
+                    <div id="modelVisualization" class="viz-canvas"></div>
+                </section>
+
+                <section class="tab-pane" id="topologyTab">
+                    <h3>Device topology</h3>
+                    <div id="topologyVisualization" class="viz-canvas"></div>
+                </section>
+
+                <section class="tab-pane" id="partitionTab">
+                    <h3>Partition scheme</h3>
+                    <div id="partitionVisualization" class="viz-canvas"></div>
+                </section>
+
+                <section class="tab-pane" id="compareTab">
+                    <h3>Algorithm comparison</h3>
+                    <p class="tab-hint">Compare HiveMind vs EdgePipe under the same config (seed matches left panel).</p>
+                    <div id="compareTabContent" class="viz-canvas">
+                        <div id="compareChartsWrap" class="compare-charts-wrap"></div>
+                        <div id="compareTableContainer" class="compare-table-container"></div>
+                        <div class="compare-export-row">
+                            <button id="exportCompareBtn" class="action-btn action-btn-secondary" style="display:none;">Export compare CSV</button>
+                            <button id="exportCompareJsonBtn" class="action-btn action-btn-secondary" style="display:none;">Export compare JSON</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="tab-pane" id="metricsTab">
+                    <h3>Performance metrics</h3>
+                    <div id="metricsDisplay" class="metrics-grid metrics-grid-extended">
+                        <div class="metric-item">
+                            <div class="metric-name">Throughput</div>
+                            <div class="metric-num" id="throughputValue">-</div>
+                            <div class="metric-unit">batches/s</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-name">Inference time</div>
+                            <div class="metric-num" id="inferenceTimeValue">-</div>
+                            <div class="metric-unit">s</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-name">Device utilization</div>
+                            <div class="metric-num" id="utilizationValue">-</div>
+                            <div class="metric-unit">%</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-name">Activation comm. (sum)</div>
+                            <div class="metric-num" id="commVolumeValue">-</div>
+                            <div class="metric-unit">MB</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-name">Energy proxy</div>
+                            <div class="metric-num" id="energyProxyValue">-</div>
+                            <div class="metric-unit">J (illustrative)</div>
+                        </div>
+                    </div>
+                    <p id="energyProxyHint" class="tab-hint" style="display:none;margin-top:8px;"></p>
+                    <div id="deviceMetricsTable" class="device-table"></div>
+                    <p id="seedEcho" class="tab-hint" style="margin-top:10px;"></p>
+                    <h4 class="metrics-subtitle">Device performance (GFlops/s)</h4>
+                    <div id="perfBarsWrap" class="mini-chart-wrap"></div>
+                    <h4 class="metrics-subtitle">Bandwidth matrix (MB/s)</h4>
+                    <div id="bandwidthHeatmapWrap" class="heatmap-wrap"></div>
+                    <h4 class="metrics-subtitle">Pipeline stage time (bottleneck)</h4>
+                    <div id="pipelineStageWrap" class="mini-chart-wrap"></div>
+                    <button id="exportSimJsonBtn" type="button" class="action-btn action-btn-secondary" style="margin-top:12px;display:none;">Export simulation JSON</button>
+                    <h4 class="metrics-subtitle">Recent runs (local)</h4>
+                    <div id="historyWrap" class="history-wrap"></div>
+                    <div id="compareResultSection" class="compare-section" style="display:none;">
+                        <h4>Algorithm comparison</h4>
+                        <div id="compareResultTable" class="device-table"></div>
+                    </div>
+                </section>
+            </article>
+
+            <aside class="log-panel">
+                <h2>Log</h2>
+                <div id="logContainer" class="log-box"></div>
+                <button id="clearLogBtn" class="action-btn action-btn-small">Clear log</button>
+            </aside>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=6"></script>
+</body>
+</html>

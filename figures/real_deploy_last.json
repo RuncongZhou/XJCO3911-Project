@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-04-14T11:12:39.453931+00:00",
+  "server": {
+    "role": "server",
+    "part1_ms": 60.0,
+    "send_ms": 2.0,
+    "tensor_shape": [
+      1,
+      9216
+    ]
+  },
+  "client": {
+    "role": "client",
+    "connect_ms": 0.5,
+    "recv_ms": 65.0,
+    "classifier_ms": 10.0,
+    "argmax": 735
+  },
+  "baseline": {
+    "mean_ms": 40.0,
+    "stdev_ms": 2.0,
+    "runs": 5,
+    "warmup": 1
+  },
+  "derived": {
+    "connect_ms": 0.5,
+    "recv_ms": 65.0,
+    "classifier_ms": 10.0,
+    "part1_ms": 60.0,
+    "send_ms": 2.0,
+    "total_pipeline_ms": 75.5,
+    "full_mean_ms": 40.0,
+    "full_stdev_ms": 2.0,
+    "overhead_ms": 35.5,
+    "pct_recv": 86.09271523178808,
+    "pct_cls": 13.245033112582782,
+    "pct_conn": 0.6622516556291391
+  }
+}

@@ -1,0 +1,63 @@
+================================================================================
+THESIS DRAFT — Chapter 5 (English)
+Leeds COMP3931 — Multi-Device DNN Collaborative Inference at the Edge
+Match styling with thesis_draft_chapters_1_to_3.txt; edit in Word (11pt, 1.5).
+================================================================================
+
+
+Chapter 5 Conclusions
+--------------------------------------------------------------------------------
+
+This final chapter restates the problem and contributions in light of Chapters 2–4, answers the project aim at a high level, and sets out **future work** that would address the main limitations of a simulation-centred study (Kang et al., 2017; Mao et al., 2017).
+
+
+5.1 Conclusions
+
+The work addressed **collaborative DNN inference at the edge** when no single device is assumed to run the full model, and when designers need to **compare** placement and scheduling policies under shared assumptions rather than in an ad-hoc or opaque way. The implemented platform combines **HiveMind-style** and **EdgePipe-style** planning with **data-driven layer profiles**, a **Flask** service and **JSON** APIs, and a **browser** client for configuration, **visualisation** (model structure, topology, partition, metrics, and algorithm comparison), and **reproducible** batch evaluation (McMahan et al., 2017). Against the contribution statement in Chapter 1, the project delivers:
+
+(1) **A working system.** The deliverable is an integrated software artefact: engines, CSV-based layer metadata for multiple models, a thin HTTP API, a tabbed front end, and a batch pipeline that writes **experiments_results.csv** and standard figures. Interactive and batch paths can be cross-checked for matched payloads, supporting internal **validation** as described in Chapter 3.
+
+(2) **A consistent evaluation methodology.** Chapter 2 fixed notation, baselines, and metrics. Chapter 4 applied that methodology across **models**, **device counts**, **bandwidth** and **device performance** sweeps, and **trade-off** and **stage-level** views. The baseline block shows a **throughput–latency trade-off** between the two policies under identical seeds: **EdgePipe** attains **higher throughput**; **HiveMind** attains **lower inference time** on the same profiles, so neither metric defines a single universal winner. **Device count** is not always “more is better” in simulation, in line with communication–computation trade-offs in pipelined edge inference (Kang et al., 2017).
+
+(3) **A critical view of scope.** The dissertation does not claim that simulator outputs are wall-clock **hardware** results. Chapter 2 already stated the limits of a linear compute model, static bandwidth draws, and illustrative energy **proxies**. Chapter 4 reinforced that all reported numbers are **in-process** simulation outputs. The value of the work is **relative comparison** and **transparency of assumptions** under a shared evaluation harness, not certification for a particular deployment (Mao et al., 2017).
+
+**Alignment with the aim.** The original aim—to build a **platform** that makes multi-device split inference and policy comparison **inspectable** and **reproducible**—is met at the level of **software and methodology**. The project does not close every research question in edge split inference; it provides a **usable baseline** and a **clear** statement of what would be needed next to move from simulation toward deployment evidence (Section 5.2).
+
+Legal, social, ethical, and professional **reflection** is reserved for **Appendix A** as required by the programme; it is not repeated here in full.
+
+
+5.2 Future work
+
+The following items are the most direct extensions of the present system and evaluation, ordered roughly by how strongly they address the **simulation–reality** gap and **productisation**.
+
+**Physical testbeds and traces.** The highest-priority follow-on is to run a **subset** of partitions on **real** devices or containers with **measured** link throughput and **instrumented** layer times, and to compare with the simulator for the same configuration. That would test whether **rankings** or **bottleneck stories** from Chapter 4 still hold, or only **qualitative** trends (Kang et al., 2017; Mao et al., 2017).
+
+**Time-varying and asymmetric links.** The current work uses **static** random matrices and ranges. Future work could inject **stochastic** or **trace-driven** bandwidth, or **asymmetric** links, to study robustness of partitions under mobility or contention.
+
+**Richer compute and memory models.** The linear **FLOP-rate** model could be replaced or augmented with **measured** operator latencies, **batching**, or **memory** limits per device, to reduce optimism when device counts or tensor sizes create pressure beyond compute alone (Mao et al., 2017).
+
+**Wider model and engine coverage.** Additional **CSV** profiles and, if available, **additional** partition/planning algorithms would make the platform a stronger comparison hub without changing the overall architecture (Fielding, 2000).
+
+**Calibration of proxies.** The **energy** proxy in outputs should be **replaced or calibrated** if serious energy claims are required; that requires **device** measurements or **external** cost models, which were out of scope here.
+
+**Product engineering.** A **production** deployment would use a **WSGI** server, **authentication**, and **hardening** of any public demo; the dissertation used a **local** **Flask** development server for **demonstration** (Chapter 3).
+
+**User-centred evaluation.** A formal **usability** study of the **UI** (configuration flow, legibility of metrics) would support claims about who can operate the tool without specialist knowledge; the present work relied on **informal** use during development and validation (Mao et al., 2017).
+
+Together, these directions preserve the **core idea** of the project—**transparent**, **reproducible** comparison of collaborative inference **policies** under stated assumptions—while narrowing the distance between **reported** numbers and **deployed** edge systems (Kang et al., 2017).
+
+
+References cited in Chapter 5 (merge into master list)
+
+Fielding, R.T. (2000) Architectural Styles and the Design of Network-based Software Architectures. Doctoral dissertation, University of California, Irvine.
+
+Kang, Y. et al. (2017) Neurosurgeon. ASPLOS.
+
+Mao, Y. et al. (2017) A Survey on Mobile Edge Computing: The Communication Perspective. IEEE Communications Surveys and Tutorials.
+
+McMahan, H.B. et al. (2017) Communication-Efficient Learning of Deep Networks from Decentralized Data. AISTATS.
+
+
+================================================================================
+END OF FILE — thesis_draft_chapter_5.txt
+================================================================================

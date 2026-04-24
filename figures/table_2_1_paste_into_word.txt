@@ -1,0 +1,9 @@
+Symbol or term	Meaning	Typical baseline (thesis preset)
+L	Number of layers in the model profile	Model-dependent (from CSV)
+K	Number of devices	5
+s	Pipeline device order (permutation of device indices)	(0, 1, …, K−1) unless shuffled
+B	Symmetric bandwidth matrix (MB/s)	Random integers in [21, 31] for off-diagonals
+f	Per-device compute vector (GFlops/s)	Linear spacing in [41, 60] across devices
+Seed	Random draws for matrices	1 (batch default)
+η	Link efficiency scaling effective rates	1.0 unless sensitivity run
+Partition	Start and end layer indices per device	From engine or user custom scheme

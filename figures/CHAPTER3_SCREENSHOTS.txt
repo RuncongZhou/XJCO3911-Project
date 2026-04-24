@@ -1,0 +1,43 @@
+Chapter 3 — which figures are auto-generated vs screenshots
+================================================================
+
+AUTO-GENERATED (already in figures/ and figures/final_figures/)
+----------------------------------------------------------------
+  figure_3_1_implementation_stack.png  (+ .svg)
+  → Figure 3.1: implementation stack (D3, vis, Flask routes, engines, CSV)
+  Regenerate:  python figures/generate_figure_3_1.py
+
+
+YOU MUST SCREENSHOT (cannot be generated as code in this project)
+------------------------------------------------------------------
+  Figure 3.2  —  Topology and/or Partition tab, after a successful run
+  Figure 3.3  —  Metrics tab and/or Compare tab, after simulation/compare
+
+Suggested steps (after: python app.py, open http://127.0.0.1:5000/):
+
+  Figure 3.2a (optional): Tab "Model structure" with graph visible
+  Figure 3.2b: Tab "Topology" -> click "Generate topology" if empty
+  Figure 3.2c: Tab "Partition" -> run "Run simulation" first, then
+             capture partition blocks (or "Apply partition from last run")
+
+  For one combined 3.2: use Windows Snip & Sketch to capture
+  "Topology" + "Partition" in one window, or two screenshots as 3.2(a)(b)
+
+  Figure 3.3a: Tab "Metrics" after simulation — show throughput, heatmap,
+             pipeline bars, seed line (scroll to include key panels)
+  Figure 3.3b: Tab "Compare" -> "Compare algorithms" -> capture table + bar charts
+
+Settings for nicer screenshots:
+  - Preset: Thesis baseline (5 devices, 21–31 MB/s, 41–60)
+  - Model: AlexNet, Seed: 1
+  - Compare: run compare so EP/HM both appear
+  - Zoom browser to ~100% or 90%; max width 14–16 cm in Word
+
+Save as:  figure_3_2_topology_partition.png, figure_3_3_metrics_compare.png
+(Copy into figures/final_figures/ if you want one folder for all thesis assets.)
+
+
+ALTERNATIVE if screenshots are not allowed
+------------------------------------------------------------------
+  - Use only Figure 3.1 (auto) + longer prose in §3.3
+  - Or: cite "available in the online demo" without figures (ask supervisor)
