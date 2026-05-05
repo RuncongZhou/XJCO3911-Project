@@ -149,12 +149,12 @@
             btn.addEventListener('click', () => {
                 const tab = btn.dataset.tab;
                 activateTab(tab);
-            });
         });
+    });
 
         document.getElementById('clearLogBtn').addEventListener('click', () => {
-            document.getElementById('logContainer').innerHTML = '';
-        });
+        document.getElementById('logContainer').innerHTML = '';
+    });
 
         const linkEff = document.getElementById('linkEfficiency');
         if (linkEff) {
@@ -206,8 +206,8 @@
 
         if (state.layerData.length === 0) {
             box.append('p').text('No model data');
-            return;
-        }
+        return;
+    }
 
         const w = box.node().offsetWidth - 40;
         const h = Math.max(600, state.layerData.length * 40);
@@ -219,50 +219,50 @@
 
         const groups = svg.selectAll('.layer-node')
             .data(state.layerData)
-            .enter()
-            .append('g')
-            .attr('class', 'layer-node')
+        .enter()
+        .append('g')
+        .attr('class', 'layer-node')
             .attr('transform', (d, i) => `translate(${w / 2 - nodeW / 2}, ${i * layerH + layerH / 2 - nodeH / 2})`);
 
         groups.append('rect')
             .attr('width', nodeW)
             .attr('height', nodeH)
-            .attr('rx', 5)
+        .attr('rx', 5)
             .attr('fill', (d) => layerTypeColor(d.type))
-            .attr('stroke', '#333')
-            .attr('stroke-width', 2);
+        .attr('stroke', '#333')
+        .attr('stroke-width', 2);
 
         groups.append('text')
-            .attr('class', 'layer-label')
+        .attr('class', 'layer-label')
             .attr('x', nodeW / 2)
             .attr('y', nodeH / 2)
-            .attr('text-anchor', 'middle')
-            .attr('dy', '0.35em')
+        .attr('text-anchor', 'middle')
+        .attr('dy', '0.35em')
             .text((d) => d.name || `Layer ${d.id}`);
 
-        svg.selectAll('.layer-connection')
+    svg.selectAll('.layer-connection')
             .data(state.layerData.slice(0, -1))
-            .enter()
-            .append('line')
-            .attr('class', 'layer-connection')
+        .enter()
+        .append('line')
+        .attr('class', 'layer-connection')
             .attr('x1', w / 2)
             .attr('y1', (d, i) => (i + 1) * layerH)
             .attr('x2', w / 2)
             .attr('y2', (d, i) => (i + 1) * layerH + 10)
-            .attr('stroke', '#666')
-            .attr('stroke-width', 2)
-            .attr('marker-end', 'url(#arrowhead)');
+        .attr('stroke', '#666')
+        .attr('stroke-width', 2)
+        .attr('marker-end', 'url(#arrowhead)');
 
-        svg.append('defs').append('marker')
-            .attr('id', 'arrowhead')
-            .attr('viewBox', '0 0 10 10')
-            .attr('refX', 5)
-            .attr('refY', 5)
-            .attr('markerWidth', 6)
-            .attr('markerHeight', 6)
-            .append('path')
-            .attr('d', 'M 0 0 L 10 5 L 0 10 z')
-            .attr('fill', '#666');
+    svg.append('defs').append('marker')
+        .attr('id', 'arrowhead')
+        .attr('viewBox', '0 0 10 10')
+        .attr('refX', 5)
+        .attr('refY', 5)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .append('path')
+        .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+        .attr('fill', '#666');
 
         groups.append('title')
             .text((d) => `${d.name}\nType: ${d.type}\nFLOPs: ${d.flops.toExponential(2)}\nData: ${d.dataSize.toFixed(2)} MB`);
@@ -275,17 +275,17 @@
 
     function syncDeviceOrder() {
         const n = parseInt(document.getElementById('deviceNum').value);
-        const container = document.getElementById('deviceOrderContainer');
-        container.innerHTML = '';
+    const container = document.getElementById('deviceOrderContainer');
+    container.innerHTML = '';
         const order = Array.from({ length: n }, (_, i) => i);
         order.forEach((id) => {
-            const tag = document.createElement('div');
-            tag.className = 'device-tag';
+        const tag = document.createElement('div');
+        tag.className = 'device-tag';
             tag.textContent = `Device ${id}`;
             tag.dataset.deviceId = id;
-            tag.draggable = true;
-            container.appendChild(tag);
-        });
+        tag.draggable = true;
+        container.appendChild(tag);
+    });
         initDragDrop();
     }
 
@@ -299,7 +299,7 @@
             });
             tag.addEventListener('dragover', (e) => e.preventDefault());
             tag.addEventListener('drop', (e) => {
-                e.preventDefault();
+    e.preventDefault();
                 if (draggedNode !== tag) {
                     const parent = tag.parentNode;
                     const list = Array.from(parent.children);
@@ -307,7 +307,7 @@
                     const toIdx = list.indexOf(tag);
                     if (fromIdx < toIdx) {
                         parent.insertBefore(draggedNode, tag.nextSibling);
-                    } else {
+        } else {
                         parent.insertBefore(draggedNode, tag);
                     }
                 }
@@ -322,20 +322,20 @@
     function shuffleDeviceOrder() {
         const n = parseInt(document.getElementById('deviceNum').value);
         const order = Array.from({ length: n }, (_, i) => i);
-        for (let i = order.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [order[i], order[j]] = [order[j], order[i]];
-        }
-        const container = document.getElementById('deviceOrderContainer');
-        container.innerHTML = '';
+    for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [order[i], order[j]] = [order[j], order[i]];
+    }
+    const container = document.getElementById('deviceOrderContainer');
+    container.innerHTML = '';
         order.forEach((id) => {
-            const tag = document.createElement('div');
-            tag.className = 'device-tag';
+        const tag = document.createElement('div');
+        tag.className = 'device-tag';
             tag.textContent = `Device ${id}`;
             tag.dataset.deviceId = id;
-            tag.draggable = true;
-            container.appendChild(tag);
-        });
+        tag.draggable = true;
+        container.appendChild(tag);
+    });
         initDragDrop();
         appendLog('Device order shuffled', 'info');
     }
@@ -355,15 +355,15 @@
 
             appendLog('Generating topology...', 'info');
             const resp = await fetch('/api/device-topology', {
-                method: 'POST',
+            method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+            body: JSON.stringify({
                     deviceNum: n,
                     bandwidthRange: [bwMin, bwMax],
                     performanceRange: [perfMin, perfMax],
                     randomSeed: getRandomSeed()
-                })
-            });
+            })
+        });
             const json = await resp.json();
             if (!json.success) throw new Error(json.error);
             state.topologyData = json;
@@ -377,29 +377,29 @@
     function renderTopologyViz() {
         if (!state.topologyData) return;
 
-        const container = document.getElementById('topologyVisualization');
-        container.innerHTML = '';
+    const container = document.getElementById('topologyVisualization');
+    container.innerHTML = '';
 
         const nodes = state.topologyData.nodes.map((node) => ({
-            id: node.id,
-            label: `${node.label}\n${node.performance.toFixed(1)} GFlops/s`,
-            color: {
+        id: node.id,
+        label: `${node.label}\n${node.performance.toFixed(1)} GFlops/s`,
+        color: {
                 background: '#6366f1',
                 border: '#4f46e5',
                 highlight: { background: '#8b5cf6', border: '#6366f1' }
             },
             font: { size: 14, color: 'white' },
-            x: node.x,
-            y: node.y,
-            fixed: true
-        }));
+        x: node.x,
+        y: node.y,
+        fixed: true
+    }));
 
         const edges = state.topologyData.edges.map((e) => ({
             from: e.from,
             to: e.to,
             label: e.label,
             color: { color: '#666', highlight: '#6366f1' },
-            width: 2,
+        width: 2,
             smooth: { type: 'continuous' }
         }));
 
@@ -460,7 +460,7 @@
             }
 
             const resp = await fetch('/api/simulate', {
-                method: 'POST',
+            method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
                 cache: 'no-store'
@@ -493,9 +493,9 @@
         const r = data || state.simResult;
         if (!r || !r.partitionScheme) return;
 
-        const container = document.getElementById('partitionVisualization');
+    const container = document.getElementById('partitionVisualization');
         if (!container) return;
-        container.innerHTML = '';
+    container.innerHTML = '';
 
         const div = document.createElement('div');
         div.className = 'partition-visualization';
@@ -504,8 +504,8 @@
             const block = document.createElement('div');
             block.className = 'device-partition';
 
-            const header = document.createElement('div');
-            header.className = 'device-partition-header';
+        const header = document.createElement('div');
+        header.className = 'device-partition-header';
             header.textContent = `Device ${dev.deviceId}`;
             block.appendChild(header);
 
@@ -514,8 +514,8 @@
 
             if (dev.startLayer > 0 && dev.endLayer >= dev.startLayer) {
                 for (let L = dev.startLayer; L <= dev.endLayer; L++) {
-                    const chip = document.createElement('div');
-                    chip.className = 'layer-chip active';
+                const chip = document.createElement('div');
+                chip.className = 'layer-chip active';
                     chip.textContent = `L${L}`;
                     list.appendChild(chip);
                 }
@@ -701,7 +701,7 @@
         tableBox.innerHTML = '';
 
         if (r.deviceMetrics) {
-            const table = document.createElement('table');
+    const table = document.createElement('table');
             table.innerHTML = `
                 <thead><tr>
                     <th>Device ID</th>
@@ -714,17 +714,17 @@
             `;
             const tbody = table.querySelector('tbody');
             r.deviceMetrics.forEach((dev) => {
-                const row = document.createElement('tr');
+        const row = document.createElement('tr');
                 const layerCount = dev.endLayer >= dev.startLayer ? dev.endLayer - dev.startLayer + 1 : 0;
-                row.innerHTML = `
+        row.innerHTML = `
                     <td>${dev.deviceId}</td>
                     <td>${dev.performance.toFixed(2)}</td>
                     <td>${dev.startLayer}</td>
                     <td>${dev.endLayer}</td>
                     <td>${layerCount}</td>
-                `;
-                tbody.appendChild(row);
-            });
+        `;
+        tbody.appendChild(row);
+    });
             tableBox.appendChild(table);
         }
 

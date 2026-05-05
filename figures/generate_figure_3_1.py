@@ -1,10 +1,12 @@
 """
-Thesis Figure 3.1 — implementation-oriented component stack (Chapter 3).
-Distinction from Figure 2.1: names concrete client libraries and API routes.
+Thesis Figure 3.1 — implementation stack, Chapter 3.
+Libraries, app.py, API paths, module names. No in-image title; large type.
+Fig. 2.1 is only logical; this figure is implementation detail.
 
 Run: python figures/generate_figure_3_1.py
-Outputs: figure_3_1_implementation_stack.png, .svg (300 dpi PNG)
+Outputs: figure_3_1_implementation_stack.png, .svg
 """
+import shutil
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -13,75 +15,100 @@ from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 FIG_DIR = Path(__file__).resolve().parent
 OUT = FIG_DIR / "figure_3_1_implementation_stack"
 DPI = 300
+TITLE_PT = 14.5
+LINE_PT = 12.0
+MONO_PT = 10.5
 
 
 def main():
-    fig, ax = plt.subplots(figsize=(11, 6.5), facecolor="white")
+    fig, ax = plt.subplots(figsize=(11, 6.0), facecolor="white")
     ax.set_xlim(0, 10)
-    ax.set_ylim(0, 6.8)
+    ax.set_ylim(0, 6.5)
     ax.axis("off")
     edge = "#37474f"
 
-    def box(x, y, w, h, fc, title, lines, ts=10.2, ls=7.8):
+    def box(x, y, w, h, fc, title, lines, use_mono=None):
         ax.add_patch(
             FancyBboxPatch(
-                (x, y), w, h, boxstyle="round,pad=0.05",
-                facecolor=fc, edgecolor=edge, linewidth=1.1,
+                (x, y), w, h, boxstyle="round,pad=0.08",
+                facecolor=fc, edgecolor=edge, linewidth=1.2,
             )
         )
-        ty = y + h - 0.32
-        ax.text(x + w / 2, ty, title, ha="center", va="top", fontsize=ts, color="#111")
-        ly = ty - 0.36
-        for line in lines:
-            ax.text(x + w / 2, ly, line, ha="center", va="top", fontsize=ls, color="#333")
-            ly -= 0.28
+        ty = y + h - 0.36
+        ax.text(
+            x + w / 2, ty, title, ha="center", va="top",
+            fontsize=TITLE_PT, fontweight="600", color="#111",
+        )
+        ly = ty - 0.4
+        if use_mono is None:
+            use_mono = [False] * len(lines)
+        for line, um in zip(lines, use_mono):
+            ax.text(
+                x + w / 2, ly, line, ha="center", va="top",
+                fontsize=MONO_PT if um else LINE_PT,
+                color="#222",
+                family="monospace" if um else "sans-serif",
+            )
+            ly -= 0.32 if not um else 0.36
 
-    # Top: client tech stack
-    box(0.2, 4.5, 4.2, 2.0, "#e8eaf6", "Browser client (front end)", [
+    # Stacked layout: top pair, full-width API, bottom pair
+    box(0.2, 4.35, 4.1, 1.75, "#e8eaf6", "Browser (front end)", [
         "D3.js: model layer hierarchy",
         "vis-network: device graph",
-        "Plain HTML/CSS/JS: tabs, forms, bar charts, export",
-    ], ts=10.5, ls=7.5)
-
-    box(4.6, 4.5, 5.2, 2.0, "#e3f2fd", "HTTP transport", [
-        "fetch() POST, JSON request/response",
-        "No server-side session; state in browser",
-    ], ts=10.5, ls=7.8)
-
-    # Middle: Flask
-    box(0.2, 2.55, 9.6, 1.65, "#bbdefb", "Flask application (app.py)", [
-        "Routes:  /  /api/simulate  /api/compare  /api/device-topology  /api/model/<name>/layers",
-        "CORS for local dev; JSON error payloads",
-    ], ts=10.5, ls=7.5)
-
-    # Bottom row: engines + data
-    box(0.2, 0.4, 4.3, 1.9, "#c8e6c9", "Engine modules (Python)", [
+        "HTML/CSS/JS: tabs, forms, charts, export",
+    ])
+    box(4.4, 4.35, 5.4, 1.75, "#e3f2fd", "HTTP", [
+        "fetch() POST, JSON",
+        "No server session; state in browser",
+    ])
+    box(
+        0.2, 2.45, 9.6, 1.7, "#bbdefb", "Flask (app.py)",
+        [
+            "/  /api/simulate  /api/compare  /api/device-topology  /api/model/<name>/layers",
+            "CORS (dev)  ·  JSON error payloads",
+        ],
+        use_mono=[True, True],
+    )
+    box(0.2, 0.38, 4.2, 1.75, "#c8e6c9", "Engine modules (Python)", [
         "HiveMind_*: graph placement, enhancedDijkstraTime",
-        "EdgePipe_*: Pipeline, dynamic_planning",
-        "Injected: band, fn, layer tensors, first_band",
-    ], ts=10, ls=7.2)
+        "EdgePipe_*: dynamic_planning",
+        "Inject: band, fn, first_band, tensors",
+    ], use_mono=[False, False, False])
+    box(4.5, 0.38, 5.3, 1.75, "#eceff1", "Data (project CSV)", [
+        "data/<Model>.csv: Flops, DataSize",
+        "AlexNet, Vgg19, YOLONet, SqueezeNet",
+    ], use_mono=[True, False])
 
-    box(4.7, 0.4, 5.1, 1.9, "#f5f5f5", "Layer data (project CSV)", [
-        "data/<Model>.csv: Flops, DataSize per layer",
-        "AlexNet, Vgg19, YOLONet, SqueezeNet, etc.",
-    ], ts=10, ls=7.2)
-
-    # Arrows: client -> http (already adjacent), http -> flask implied by position
-    ax.add_patch(FancyArrowPatch((2.2, 4.48), (6.0, 4.6), arrowstyle="-|>", mutation_scale=12, linewidth=1.3, color="#555"))
-    ax.add_patch(FancyArrowPatch((7.0, 4.48), (5.0, 4.2), arrowstyle="-|>", mutation_scale=10, linewidth=1.0, color="#999", linestyle="dashed"))
-    # flask down to engines
-    ax.add_patch(FancyArrowPatch((2.5, 2.52), (2.4, 2.33), arrowstyle="-|>", mutation_scale=12, linewidth=1.3, color=edge))
-    ax.add_patch(FancyArrowPatch((6.0, 2.52), (4.0, 2.33), arrowstyle="-|>", mutation_scale=12, linewidth=1.3, color=edge))
-    # data up to engines (inject)
-    ax.add_patch(FancyArrowPatch((5.0, 0.85), (3.5, 0.4), arrowstyle="-|>", mutation_scale=10, linewidth=1.0, color="#666", connectionstyle="arc3,rad=0.2"))
-    ax.text(5, 0.2, "load at simulation time", ha="center", fontsize=6.5, color="#666")
-
-    ax.text(5, 6.5, "Implementation stack (Chapter 3)", ha="center", fontsize=10.2, color="#333")
+    cy = 4.35 + 1.75 / 2
+    ax.add_patch(
+        FancyArrowPatch((4.2, cy), (4.42, cy), arrowstyle="-|>", mutation_scale=16, linewidth=1.5, color=edge)
+    )
+    ax.add_patch(
+        FancyArrowPatch((5.0, 2.42), (5.0, 2.15), arrowstyle="-|>", mutation_scale=15, linewidth=1.3, color=edge)
+    )
+    ax.add_patch(
+        FancyArrowPatch((2.2, 2.42), (2.0, 2.1), arrowstyle="-|>", mutation_scale=14, linewidth=1.2, color=edge)
+    )
+    ax.add_patch(
+        FancyArrowPatch((5.0, 2.42), (3.5, 2.1), arrowstyle="-|>", mutation_scale=14, linewidth=1.2, color=edge)
+    )
+    ax.add_patch(
+        FancyArrowPatch(
+            (5.0, 0.9), (3.4, 0.8), arrowstyle="-|>", mutation_scale=12, linewidth=1.0, color="#666", connectionstyle="arc3,rad=0.1",
+        )
+    )
 
     plt.tight_layout()
     plt.savefig(f"{OUT}.png", dpi=DPI, bbox_inches="tight", facecolor="white", edgecolor="none")
     plt.savefig(f"{OUT}.svg", bbox_inches="tight", facecolor="white", edgecolor="none")
     plt.close()
+
+    final = FIG_DIR / "final_figures" / "figure_3_1_implementation_stack"
+    if (FIG_DIR / "final_figures").is_dir():
+        for ext in (".png", ".svg"):
+            shutil.copy2(f"{OUT}{ext}", f"{final}{ext}")
+        print(f"  (copied to {final}.png / .svg)")
+
     print(f"Saved:\n  {OUT}.png\n  {OUT}.svg")
 
 

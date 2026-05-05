@@ -366,6 +366,132 @@ def _pipeline_stats_from_engine(engine, model_name: str, algo: str, device_count
     return stats
 
 
+def simulate_metrics_chained_batch_order(
+    model_name: str,
+    device_count: int,
+    algorithms: tuple = ("HiveMind", "EdgePipe"),
+    bw_range: list | None = None,
+    perf_range: list | None = None,
+    seed: int = 1,
+    link_eff: float = 1.0,
+) -> list[dict]:
+    """
+    Match run_batch_experiments.run_single_compare: call np.random.seed(seed) once, then
+    run each algorithm in order so the RNG draw sequence matches the batch CSV (Exp 1).
+    Used for thesis fig10 and any figure that must align with Table 4.1 baselines.
+    """
+    if bw_range is None:
+        bw_range = [21, 31]
+    if perf_range is None:
+        perf_range = [41, 60]
+    np.random.seed(seed)
+    device_order = list(range(device_count))
+    out: list[dict] = []
+    for algo in algorithms:
+        EngineClass = _get_engine_classes(model_name, algo)
+        if EngineClass is None:
+            continue
+        engine = EngineClass(device_count)
+        engine.assignment()
+        _inject_model_layer_data(engine, model_name, algo)
+        if bw_range:
+            _populate_bandwidth_matrix(engine, device_count, bw_range[0], bw_range[1])
+        if perf_range:
+            engine.fn = np.linspace(perf_range[0], perf_range[1], num=device_count)
+        _inject_device_context(device_order, device_count, model_name, algo, bw_range=bw_range)
+        if algo == "HiveMind":
+            tp_engine, ti_engine = engine.enhancedDijkstraTime()
+            throughput, inference_time = tp_engine, ti_engine
+            partition = _extract_partition_hivemind(engine, device_count)
+            L = getattr(engine, "LAYER_COUNT", getattr(engine, "L", 13))
+            sl, el = _redistribute_partition_to_avoid_relay(
+                partition["startLayers"], partition["endLayers"], L, device_count
+            )
+            if (sl, el) != (partition["startLayers"], partition["endLayers"]):
+                partition = {"startLayers": sl, "endLayers": el}
+                band_eval = np.asarray(engine.band, dtype=np.float64) * link_eff
+                entry = _MODEL_ALGO_MAP.get(model_name, _DEFAULT_ALGO)
+                hm_mod = __import__(entry[0], fromlist=["HiveMind"])
+                first_hop = getattr(hm_mod, "first_band", np.ones(device_count) * 25)
+                fh = np.asarray(first_hop, dtype=np.float64).reshape(-1)[:device_count] * link_eff
+                _, _, stage_times, bottleneck_stage_index, pipeline_stats = _evaluate_partition(
+                    sl,
+                    el,
+                    device_order,
+                    band_eval,
+                    engine.fn,
+                    fh,
+                    engine.layer_flops,
+                    engine.layer_data_sizes,
+                )
+            else:
+                band_eval = np.asarray(engine.band, dtype=np.float64) * link_eff
+                first_hop = _first_hop_for_stages(device_count, model_name, bw_range)
+                fh = np.asarray(first_hop, dtype=np.float64).reshape(-1)[:device_count] * link_eff
+                _, _, stage_times, bottleneck_stage_index, pipeline_stats = _evaluate_partition(
+                    partition["startLayers"],
+                    partition["endLayers"],
+                    device_order,
+                    band_eval,
+                    engine.fn,
+                    fh,
+                    engine.layer_flops,
+                    engine.layer_data_sizes,
+                )
+        else:
+            throughput, inference_time = engine.dynamic_planning()
+            partition = _extract_partition_edgepipe(engine, device_count)
+            band_eval = np.asarray(engine.band, dtype=np.float64) * link_eff
+            first_hop = _first_hop_for_stages(device_count, model_name, bw_range)
+            lf, ld = _engine_layer_arrays(engine)
+            fh = np.asarray(first_hop, dtype=np.float64).reshape(-1)[:device_count] * link_eff
+            _, _, stage_times, bottleneck_stage_index, pipeline_stats = _evaluate_partition(
+                partition["startLayers"],
+                partition["endLayers"],
+                device_order,
+                band_eval,
+                engine.fn,
+                fh,
+                lf,
+                ld,
+            )
+        stage_times_json = [float(x) if np.isfinite(x) else None for x in stage_times]
+        band = engine.band
+        perf = engine.fn
+        device_metrics = [
+            {
+                "deviceId": device_order[i],
+                "performance": float(perf[device_order[i]]),
+                "startLayer": partition["startLayers"][i] if i < len(partition["startLayers"]) else 0,
+                "endLayer": partition["endLayers"][i] if i < len(partition["endLayers"]) else 0,
+            }
+            for i in range(device_count)
+        ]
+        bottleneck_device_id = None
+        if 0 <= bottleneck_stage_index < len(device_order):
+            bottleneck_device_id = int(device_order[bottleneck_stage_index])
+        out.append(
+            {
+                "success": True,
+                "algorithm": algo,
+                "randomSeed": seed,
+                "linkEfficiency": link_eff,
+                "throughput": float(throughput) if throughput != float("inf") else 0,
+                "inferenceTime": float(inference_time) if inference_time != float("inf") else None,
+                "partitionScheme": partition,
+                "deviceMetrics": device_metrics,
+                "bandwidthMatrix": band.tolist() if hasattr(band, "tolist") else band,
+                "devicePerformance": perf.tolist() if hasattr(perf, "tolist") else list(perf),
+                "deviceOrder": device_order,
+                "stageTimes": stage_times_json,
+                "bottleneckStageIndex": bottleneck_stage_index,
+                "bottleneckDeviceId": bottleneck_device_id,
+                "pipelineStats": _serialize_pipeline_stats(pipeline_stats),
+            }
+        )
+    return out
+
+
 @app.route('/')
 def serve_index():
     """Render main page."""
@@ -588,34 +714,34 @@ def api_compare():
     except (TypeError, ValueError):
         link_eff = 1.0
     link_eff = max(0.05, min(1.0, link_eff))
-        
-        results = {}
+
+    results = {}
     device_order = payload.get('deviceOrder', list(range(device_count)))
-        
-        for algo in algorithms:
+
+    for algo in algorithms:
         EngineClass = _get_engine_classes(model_name, algo)
         if EngineClass is None:
-                continue
+            continue
         engine = EngineClass(device_count)
-            engine.assignment()
+        engine.assignment()
         _inject_model_layer_data(engine, model_name, algo)
         _populate_bandwidth_matrix(engine, device_count, bw_range[0], bw_range[1])
         engine.fn = np.linspace(perf_range[0], perf_range[1], num=device_count)
         _inject_device_context(device_order, device_count, model_name, algo, bw_range=bw_range)
-            if algo == 'HiveMind':
+        if algo == 'HiveMind':
             tp, ti = engine.enhancedDijkstraTime()
-            else:
+        else:
             tp, ti = engine.dynamic_planning()
         pstats = _pipeline_stats_from_engine(
             engine, model_name, algo, device_count, device_order, bw_range, link_eff
         )
-            results[algo] = {
+        results[algo] = {
             'throughput': float(tp) if tp != float('inf') else 0,
             'inferenceTime': float(ti) if ti != float('inf') else None,
             'pipelineStats': _serialize_pipeline_stats(pstats),
-            }
+        }
     return jsonify(success=True, results=results, randomSeed=seed, linkEfficiency=link_eff)
-        
+
 
 @app.route('/api/device-topology', methods=['POST'])
 @_handle_api_errors

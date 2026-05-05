@@ -3,6 +3,7 @@ Thesis figure: pipeline stage times + bottleneck (matches /api/simulate logic).
 Run: python figures/generate_pipeline_stage_fig.py
 Output: figures/fig10_pipeline_stage_times.png
 """
+import shutil
 import sys
 from pathlib import Path
 
@@ -42,28 +43,21 @@ def apply_theme():
     )
 
 
-def fetch_simulate(algorithm: str):
-    client = app_module.app.test_client()
-    payload = {
-        "model": "AlexNet",
-        "deviceNum": 5,
-        "algorithm": algorithm,
-        "deviceOrder": [0, 1, 2, 3, 4],
-        "bandwidthRange": [21, 31],
-        "performanceRange": [41, 60],
-        "randomSeed": 1,
-    }
-    r = client.post("/api/simulate", json=payload)
-    assert r.status_code == 200, r.get_data(as_text=True)
-    data = r.get_json()
-    assert data.get("success"), data
-    return data
-
-
 def main():
     apply_theme()
-    hm = fetch_simulate("HiveMind")
-    ep = fetch_simulate("EdgePipe")
+    # Same RNG order as run_batch_experiments.run_single_compare (Table 4.1 baselines);
+    # two separate /api/simulate calls each re-seed(1) and are NOT comparable to the CSV.
+    paired = app_module.simulate_metrics_chained_batch_order(
+        "AlexNet",
+        5,
+        ("HiveMind", "EdgePipe"),
+        [21, 31],
+        [41, 60],
+        seed=1,
+        link_eff=1.0,
+    )
+    assert len(paired) == 2
+    hm, ep = paired[0], paired[1]
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11.2, 4.8))
 
@@ -81,6 +75,17 @@ def main():
             bar_colors[bn] = "#c2410c"
             bar_edges[bn] = "#7c2d12"
         ax.barh(y, vals, color=bar_colors, edgecolor=bar_edges, linewidth=0.45)
+        for yi, v in zip(y, vals):
+            if v <= 0.0 and n > 0:
+                ax.text(
+                    max(vals) * 0.01 if max(vals) > 0 else 1e-4,
+                    yi,
+                    "0",
+                    ha="left",
+                    va="center",
+                    fontsize=7,
+                    color="#555555",
+                )
         ax.set_yticks(y)
         do = data.get("deviceOrder") or list(range(n))
         labels = []
@@ -105,7 +110,7 @@ def main():
     _one(ax2, ep, "EdgePipe")
 
     fig.suptitle(
-        "Pipeline per-stage time (AlexNet, 5 devices, seed=1; bottleneck highlighted)",
+        "Pipeline per-stage time (AlexNet, 5 devices; same RNG order as Table 4.1 / run_batch_experiments Exp 1)",
         fontsize=12,
         fontweight="600",
         y=1.02,
@@ -116,6 +121,10 @@ def main():
     plt.savefig(out, dpi=FIG_DPI, bbox_inches="tight", facecolor=FACE, edgecolor="none")
     plt.close()
     print(f"Saved {out}")
+    final = FIG_DIR / "final_figures" / out.name
+    final.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(out, final)
+    print(f"Copied -> {final}")
 
 
 if __name__ == "__main__":

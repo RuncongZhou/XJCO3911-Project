@@ -80,6 +80,18 @@ print("7. Generating pipeline stage / bottleneck figure (fig10)...")
 run_script("figures/generate_pipeline_stage_fig.py")
 copy_if_exists("fig10_pipeline_stage_times.png")
 
+print("8. Extra figures in figures/ (schedule, timeline, optional)...")
+for extra in (
+    "schedule_table.png",
+    "timeline.png",
+    "figure3.3.png",
+    "real_deploy_pipeline_stages.png",
+    "real_deploy_split_vs_full.png",
+    "real_deploy_pipeline_share.png",
+    "real_deploy_summary_table.png",
+):
+    copy_if_exists(extra)
+
 files = sorted(OUT_DIR.glob("*.png"))
 print(f"\n=== Done. {len(files)} PNG files in: {OUT_DIR} ===")
 for f in files:
