@@ -31,7 +31,7 @@ B.2  Client-side libraries loaded from a CDN in the main HTML template
 The file templates/index.html loads:
 
 - d3 (v7, min build) from d3js.org, used for graph-style visualisation of the model. Licence: ISC (D3). URL at development time: https://d3js.org/d3.v7.min.js
-- vis-network and its CSS from jsDelivr, for network topology view. The vis.js / vis-network stack is dual-licensed under Apache 2.0 and MIT for components; the distribution used is the unmodified minified bundle from the project’s public CDN. URLs at development time: https://cdn.jsdelivr.net/npm/vis-network@latest/…
+- vis-network and its CSS from jsDelivr, for network topology view. The vis.js / vis-network stack is dual-licensed under Apache 2.0 and MIT for components; the distribution used is the unmodified minified bundle from the project’s public CDN. URLs pinned at submission traceability (version 10.0.2, matching templates/index.html): https://cdn.jsdelivr.net/npm/vis-network@10.0.2/dist/vis-network.min.js and https://cdn.jsdelivr.net/npm/vis-network@10.0.2/dist/vis-network.min.css
 
 A modern browser (fetch, DOM APIs) is assumed; no claim is made about compatibility with very old clients.
 
