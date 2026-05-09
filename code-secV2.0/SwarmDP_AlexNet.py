@@ -363,7 +363,6 @@ class SwarmDPSolver:
 
         # 导入层参数(每一层所需要浮点运算次数cl和输出数据大小dl)
         df = pd.read_csv("data/AlexNet.csv")
-        #df = pd.read_csv("/home/hanbiao/code-secV2.0/data/AlexNet.csv")  # 远程服务器的位置
         # df.values.tolist()
         self.flops_per_layer = np.array(df["Flops"])  # 获取某一列的值
         # print("DNN层数为:", L)
